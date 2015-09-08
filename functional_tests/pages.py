@@ -9,7 +9,7 @@ class BasePage:
     def __init__(self, url):
         self.url = url
 
-    def go_to(self):
+    def load(self):
         SeleniumDriver().driver.get(self.url)
 
     def get_title(self):

@@ -8,7 +8,7 @@ from .locators import CommonLocators
 WAITING_TIME = 5
 
 
-class WebElement:
+class WebElementMixin:
     @property
     def wrapped(self):
         try:
@@ -22,7 +22,7 @@ class WebElement:
         self.wrapped.click()
 
 
-class WebElementCollection:
+class WebElementCollectionMixin:
     @property
     def wrapped(self):
         try:
@@ -36,21 +36,26 @@ class WebElementCollection:
         return len(self.wrapped)
 
 
-class HomeLink(WebElement):
+class HomeLink(WebElementMixin):
     locator = CommonLocators.HOME_LINK
 
 
-class PythonCategoryLink(WebElement):
+class CategoryLink(WebElementMixin):
+    def is_enabled(self):
+        return 'active' in self.wrapped.get_attribute('class')
+
+
+class PythonCategoryLink(CategoryLink):
     locator = CommonLocators.PYTHON_CATEGORY_LINK
 
 
-class DjangoCategoryLink(WebElement):
+class DjangoCategoryLink(CategoryLink):
     locator = CommonLocators.DJANGO_CATEGORY_LINK
 
 
-class MiscellaneousCategoryLink(WebElement):
+class MiscellaneousCategoryLink(CategoryLink):
     locator = CommonLocators.MISCELLANEOUS_CATEGORY_LINK
 
 
-class PostsCollection(WebElementCollection):
+class PostsCollection(WebElementCollectionMixin):
     locator = CommonLocators.POSTS
