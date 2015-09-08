@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="container">
+    {% for post in post_list %}
+      <div class="row post">
+        <p class="col-sm-12">
+          <h4>{{ post.title }}</h4>
+          <p class="small">
+            <strong>Created</strong>: {{ post.created }} <strong>Tags</strong>: {{ post.tags }}
+          </p>
+          <p>{{ post.content }}</p>
+          <button class="btn btn-secondary btn-sm" type="button" data-toggle="button" aria-pressed="false" autocomplete="off">Read more ...</button>
+        </p>
+      </div>
+    {% empty %}
+      <div class="row post">
+        <p class="col-sm-12">
+          <h4>Results were not found.</h4>
+        </p>
+      <div>
+    {% endfor %}
+  </div>
+{% endblock content %}

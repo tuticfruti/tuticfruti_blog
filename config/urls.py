@@ -5,11 +5,11 @@ from django.conf import settings
 from django.conf.urls import include, url
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.views.generic import TemplateView
+
+from tuticfruti_blog.posts.views import HomePageView
 
 urlpatterns = [
-    url(r'^$', TemplateView.as_view(template_name='pages/home.html'), name="home"),
-    url(r'^about/$', TemplateView.as_view(template_name='pages/about.html'), name="about"),
+    url(r'^$', HomePageView.as_view(), name="home"),
 
     # Django Admin
     url(r'^admin/', include(admin.site.urls)),
@@ -19,7 +19,8 @@ urlpatterns = [
     url(r'^accounts/', include('allauth.urls')),
 
     # Your stuff: custom urls includes go here
-
+    url(r'^posts/', include('tuticfruti_blog.posts.urls', namespace='posts')),
+    url(r'^comments/', include('tuticfruti_blog.comments.urls', namespace='comments')),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
