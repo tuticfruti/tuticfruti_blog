@@ -13,30 +13,37 @@
     <title>Tuticfruti Blog</title>
   </head>
   <body>
-    <nav id="navbar-top" class="navbar navbar-light navbar-fixed-top bg-faded"> <!-- nav -->
-      <a class="navbar-brand" href="{% url 'home' %}">Blog</a>
-      <ul class="nav navbar-nav">
-        <li class="nav-item">
-          <a href="{% url "posts:list" 'python' %}" class="nav-link">Python</a>
-        </li>
-        <li class="nav-item">
-          <a href="{% url "posts:list" 'django' %}" class="nav-link">Django</a>
-        </li>
-        <li class="nav-item">
-          <a href="{% url "posts:list" 'miscellaneous' %}" class="nav-link">Miscellaneous</a>
-        </li>
-      </ul>
-      <form id="search-form" class="form-inline navbar-form pull-right">
-        <div class="input-group">
-          <input type="text" class="form-control" placeholder="Search" aria-label="">
-          <span class="input-group-btn">
-            <button class="btn btn-secondary" type="submit">Go!</button>
-          </span>
-        </div>
-      </form>
+    <nav id="navbar-top" class="navbar navbar-light navbar-fixed-top bg-faded row"> <!-- nav -->
+      <div class="col-xs-12 col-sm-7">
+        <a class="navbar-brand" href="{% url 'home' %}">Blog</a>
+        <ul class="nav navbar-nav">
+          <li class="nav-item">
+            <a href="{% url "posts:list" 'python' %}" class="nav-link {% if current_category_id == 'python' %} active{% endif %}">Python</a>
+          </li>
+          <li class="nav-item">
+            <a href="{% url "posts:list" 'django' %}" class="nav-link {% if current_category_id == 'django' %} active{% endif %}">Django</a>
+          </li>
+          <li class="nav-item">
+            <a href="{% url "posts:list" 'miscellaneous' %}" class="nav-link {% if current_category_id == 'miscellaneous' %} active{% endif %}">Miscellaneous</a>
+          </li>
+        </ul>
+      </div>
+      <div class="col-xs-12 col-sm-5">
+        <form id="search-form" class="form-inline navbar-form pull-right">
+          <div class="input-group">
+            <input type="text" class="form-control" placeholder="Search" aria-label="">
+            <span class="input-group-btn">
+              <button class="btn btn-secondary" type="submit">Go!</button>
+            </span>
+          </div>
+        </form>
+      </div>
     </nav> <!-- /nav -->
     {% block content %}{% endblock content %}
-    <p class="text-center "><em><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a><em>.</p>
+    <div class="text-center">
+      <h5>&copy; Tuticfruti {% now "Y" %}</h5>
+      <em><small><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a></small><em>.
+    </div>
     <!-- jQuery first, then Bootstrap JS. -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <script src="https://cdn.rawgit.com/twbs/bootstrap/v4-dev/dist/js/bootstrap.js"></script>

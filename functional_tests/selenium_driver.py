@@ -2,4 +2,12 @@ from selenium import webdriver
 
 
 class SeleniumDriver:
-    driver = webdriver.Chrome()
+
+    @classmethod
+    def open(cls):
+        cls.driver = webdriver.Chrome()
+
+    @classmethod
+    def close(cls):
+        if cls.driver:
+            cls.driver.quit()
