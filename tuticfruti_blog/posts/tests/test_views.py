@@ -1,58 +1,21 @@
 # -*- coding: utf-8 -*-
-from unittest import mock
-
+from django.core.urlresolvers import reverse
 from django.test import TestCase
+from django.test import RequestFactory
 
-from ..views import HomePageView, PostListView, BaseListView
-
-
-class BaseListViewTest(TestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        super(BaseListView, cls).setUpClass()
-        #...
-
-    @classmethod
-    def tearDownClass(cls):
-        super(BaseListViewTest, cls).setUpClass()
-        # ...
-
-    @classmethod
-    def setUpTestData(cls):
-        pass
-        # Create rows class level
-        # cls.row = Model.objects.create()
-
-    def setUp(self):
-        # Create rows test level
-        pass
-
-    def test_template_name(self):
-        self.assertEqual(BaseListView.template_name, 'posts/home.html')
-
-    def test_context_object_name(self):
-        self.assertEqual(BaseListView.context_object_name, 'post_list')
-
-    def test_paginate_by(self):
-        self.assertEqual(BaseListView.paginate_by, 10)
-
-    def test_ordering(self):
-        self.assertEqual(BaseListView.ordering, '-created')
-
-
-class HomePageViewTest(TestCase):
-    def setUp(self):
-        self.response = self.client.get('/')
-
-    def test_correct_view(self):
-        self.assertEqual(self.response.resolver_match.func.__name__, HomePageView.as_view().__name__)
+from ..views import HomePageView, PostListView
+from ..models import Post
 
 
 class PostListViewTest(TestCase):
-    def test_correct_view(self):
-        self.response = self.client.get('/posts/category/python/')
-        self.assertEqual(self.response.resolver_match.func.__name__, PostListView.as_view().__name__)
 
-    def test_categories_links(self):
-        pass
+    def setUp(self):
+        self.categories_ids = [category_id for category_id, category_name in Post.CATEGORIES]
+        Post.objects.create(title='Post title', category_id=Post.PYTHON_CATEGORY)
+
+    def test_current_category_is_in_context(self):
+        response = self.client.get(reverse('posts:list', kwargs={'category_id': Post.PYTHON_CATEGORY}))
+        self.assertIsNotNone(
+            response.context_data.get('current_category_id', None),
+            "Variable current_category_id doesn't exist in context")
+        self.assertIn(response.context_data.get('current_category_id'), self.categories_ids)

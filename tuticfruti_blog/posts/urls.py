@@ -2,12 +2,13 @@
 from django.conf.urls import url
 
 from . import views
+from .models import Post
 
 urlpatterns = [
     url(
         regex=r'^category/(?P<category_id>[a-z]+)/$',
         view=views.PostListView.as_view(),
-        name='list'
+        name='list',
     ),
     url(
         regex=r'^(?P<slug>[a-zA-Z-]+)/$',

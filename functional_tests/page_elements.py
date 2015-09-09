@@ -1,7 +1,6 @@
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import TimeoutException
 
-from tuticfruti_blog.core.utils import singleton
 from .selenium_driver import SeleniumDriver
 from .locators import CommonLocators
 
@@ -10,30 +9,30 @@ WAITING_TIME = 5
 
 class WebElementMixin:
     @property
-    def wrapped(self):
+    def _wrapped(self):
         try:
-            wdw = WebDriverWait(SeleniumDriver().driver, WAITING_TIME)
+            wdw = WebDriverWait(SeleniumDriver.driver, WAITING_TIME)
             wdw.until(lambda driver: driver.find_element(*self.locator))
-            return SeleniumDriver().driver.find_element(*self.locator)
+            return SeleniumDriver.driver.find_element(*self.locator)
         except TimeoutException:
             return None
 
     def click(self):
-        self.wrapped.click()
+        self._wrapped.click()
 
 
 class WebElementCollectionMixin:
     @property
-    def wrapped(self):
+    def _wrapped(self):
         try:
-            wdw = WebDriverWait(SeleniumDriver().driver, WAITING_TIME)
+            wdw = WebDriverWait(SeleniumDriver.driver, WAITING_TIME)
             wdw.until(lambda driver: driver.find_elements(*self.locator))
-            return SeleniumDriver().driver.find_elements(*self.locator)
+            return SeleniumDriver.driver.find_elements(*self.locator)
         except TimeoutException:
             return None
 
     def __len__(self):
-        return len(self.wrapped)
+        return len(self._wrapped)
 
 
 class HomeLink(WebElementMixin):
@@ -41,8 +40,8 @@ class HomeLink(WebElementMixin):
 
 
 class CategoryLink(WebElementMixin):
-    def is_enabled(self):
-        return 'active' in self.wrapped.get_attribute('class')
+    def is_active(self):
+        return 'active' in self._wrapped.get_attribute('class')
 
 
 class PythonCategoryLink(CategoryLink):

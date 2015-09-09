@@ -20,7 +20,8 @@ class PostModelTest(TestCase):
         self.post = Post.objects.create(
             author=self.user,
             title='Post title',
-            content='<div></div>'
+            content='<div></div>',
+            category_id=Post.PYTHON_CATEGORY
         )
 
     def test_post_in_local_apps(self):
@@ -42,7 +43,8 @@ class PostModelTest(TestCase):
         post2 = Post.objects.create(
             author=self.user,
             title='Post title 2',
-            content='<div></div>'
+            content='<div></div>',
+            category_id=Post.PYTHON_CATEGORY
         )
 
         self.assertEqual(Post.objects.all().count(), 2)

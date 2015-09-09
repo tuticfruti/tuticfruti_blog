@@ -20,6 +20,11 @@ class PostListView(BaseListView):
     def get_queryset(self):
         return Post.objects.all().filter(category_id=self.kwargs.get('category_id'))
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['current_category_id'] = self.kwargs.get('category_id')
+        return context
+
 
 class PostDetailView(DetailView):
     model = Post
