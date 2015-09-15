@@ -7,5 +7,8 @@ class CommonLocators:
     PYTHON_CATEGORY_LINK = (By.XPATH, '//nav[@id="navbar-top"]//ul[contains(@class,"navbar-nav")]/li[1]/a')
     DJANGO_CATEGORY_LINK = (By.XPATH, '//nav[@id="navbar-top"]//ul[contains(@class,"navbar-nav")]/li[2]/a')
     MISCELLANEOUS_CATEGORY_LINK = (By.XPATH, '//nav[@id="navbar-top"]//ul[contains(@class,"navbar-nav")]/li[3]/a')
+    PAGINATION_PREV_LINK = (By.XPATH, '//nav[@id="pagination"]//li[contains(@class, "pager-prev")]/a')
+    PAGINATION_NEXT_LINK = (By.XPATH, '//nav[@id="pagination"]//li[contains(@class, "pager-next")]/a')
+    CONTAINER = (By.XPATH, '//div[contains(@class, "container")]')
 
-    POSTS = (By.XPATH, '//div[contains(@class, "post")]')
+    POSTS = (By.XPATH, '//div[contains(@id, "post")]')

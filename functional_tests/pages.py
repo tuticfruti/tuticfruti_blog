@@ -14,6 +14,9 @@ class BasePage:
     def get_title(self):
         return SeleniumDriver.driver.title
 
+    def get_current_url(self):
+        return SeleniumDriver.driver.current_url
+
 
 class HomePage(BasePage):
     # Web elements
@@ -21,6 +24,9 @@ class HomePage(BasePage):
     python_category_link = PythonCategoryLink()
     django_category_link = DjangoCategoryLink()
     miscellaneous_category_link = MiscellaneousCategoryLink()
+    pagination_prev_link = PaginationPrevLink()
+    pagination_next_link = PaginationNextLink()
+    container = Container()
 
     # Web elements collections
     posts = PostsCollection()

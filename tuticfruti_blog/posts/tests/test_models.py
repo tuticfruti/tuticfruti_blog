@@ -5,23 +5,25 @@ from django.test import TestCase
 from django.conf import settings
 from django.contrib import admin
 
-from ..models import Post
 from tuticfruti_blog.users.models import User
+from tuticfruti_blog.core.settings import PYTHON_CATEGORY
+from ..models import Post
 
 
 class PostModelTest(TestCase):
-    def setUp(self):
-        self.user = User.objects.create(
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = User.objects.create(
             username='tuticfruti',
             email='tuticfruti@example.com',
             password='1234'
         )
 
-        self.post = Post.objects.create(
-            author=self.user,
+        cls.post = Post.objects.create(
+            author=cls.user,
             title='Post title',
             content='<div></div>',
-            category_id=Post.PYTHON_CATEGORY
+            category_id=PYTHON_CATEGORY
         )
 
     def test_post_in_local_apps(self):
@@ -44,7 +46,7 @@ class PostModelTest(TestCase):
             author=self.user,
             title='Post title 2',
             content='<div></div>',
-            category_id=Post.PYTHON_CATEGORY
+            category_id=PYTHON_CATEGORY
         )
 
         self.assertEqual(Post.objects.all().count(), 2)

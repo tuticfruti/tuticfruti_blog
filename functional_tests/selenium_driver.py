@@ -2,7 +2,6 @@ from selenium import webdriver
 
 
 class SeleniumDriver:
-
     @classmethod
     def open(cls):
         cls.driver = webdriver.Chrome()

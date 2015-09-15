@@ -1,24 +1,23 @@
 # -*- coding: utf-8 -*-
 from django.views.generic import ListView, DetailView
 
-from .models import Post
+from tuticfruti_blog.core.settings import PAGINATE_BY, PAGINATE_ORPHANS, ORDERING
+from . import models
 
 
-class BaseListView(ListView):
-    model = Post
+class PostListView(ListView):
+    model = models.Post
     context_object_name = 'post_list'
     template_name = 'posts/home.html'
-    paginate_by = 10
-    ordering = '-created'
+    ordering = ORDERING
+    paginate_by = PAGINATE_BY
+    paginate_orphans = PAGINATE_ORPHANS
 
-
-class HomePageView(BaseListView):
-    queryset = Post.objects.all()
-
-
-class PostListView(BaseListView):
     def get_queryset(self):
-        return Post.objects.all().filter(category_id=self.kwargs.get('category_id'))
+        queryset = models.Post.objects.all()
+        if self.kwargs.get('category_id'):
+            queryset = models.Post.objects.filter(category_id=self.kwargs.get('category_id'))
+        return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -27,4 +26,4 @@ class PostListView(BaseListView):
 
 
 class PostDetailView(DetailView):
-    model = Post
+    model = models.Post
