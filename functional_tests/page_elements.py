@@ -1,4 +1,4 @@
-from .web_element_wrapper import WebElement, WebElementCollection
+from web_element_wrapper import WebElement, WebElementCollection
 from .locators import CommonLocators
 
 

@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 from unittest import mock
-
-from django.test import TestCase
 from django.core.urlresolvers import reverse
+from django.test import TestCase
 
 from .. import views
 from tuticfruti_blog.core.settings import PYTHON_CATEGORY, CATEGORY_CHOICES

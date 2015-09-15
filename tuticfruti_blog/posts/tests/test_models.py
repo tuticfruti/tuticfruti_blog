@@ -16,15 +16,13 @@ class PostModelTest(TestCase):
         cls.user = User.objects.create(
             username='tuticfruti',
             email='tuticfruti@example.com',
-            password='1234'
-        )
+            password='1234')
 
         cls.post = Post.objects.create(
             author=cls.user,
             title='Post title',
             content='<div></div>',
-            category_id=PYTHON_CATEGORY
-        )
+            category_id=PYTHON_CATEGORY)
 
     def test_post_in_local_apps(self):
         self.assertIn('tuticfruti_blog.posts', settings.LOCAL_APPS)
@@ -46,8 +44,7 @@ class PostModelTest(TestCase):
             author=self.user,
             title='Post title 2',
             content='<div></div>',
-            category_id=PYTHON_CATEGORY
-        )
+            category_id=PYTHON_CATEGORY)
 
         self.assertEqual(Post.objects.all().count(), 2)
 

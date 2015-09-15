@@ -2,6 +2,7 @@
 from django.conf.urls import url
 
 from . import views
+from .models import Post
 
 
 urlpatterns = [
