@@ -1,23 +1,25 @@
 {% extends "base.html" %}
 
 {% block content %}
-  {% for post in post_list %}
-    <div class="row" id="post{{ forloop.counter }}">
-      <p class="col-sm-12">
-        <h4 class="post-title">{{ post.title }}</h4>
-        <p class="small">
-          <strong>Created</strong>: <span class="post-created">{{ post.created|date }}</span> <strong>Tags</strong>: {{ post.tags }}
-        </p>
-        <p>{{ post.content }}</p>
-        <button class="btn btn-primary btn-sm" type="button" data-toggle="button" aria-pressed="false" autocomplete="off">Read more ...</button>
+<div class="container">
+{% for post in post_list %}
+  <div class="row post">
+    <p class="col-sm-12">
+      <h4 class="post_title">{{ post.title }}</h4>
+      <p class="small">
+        <strong>Created</strong>: <span class="post_created">{{ post.created|date:'F j, Y' }}</span> <strong>Tags</strong>: <span class="post_tags">{{ post.tags }}</span>
       </p>
+      <p class="post_content">{{ post.content }}</p>
+      <button class="btn btn-primary btn-sm" type="button" data-toggle="button" aria-pressed="false" autocomplete="off">Read more ...</button>
+    </p>
+  </div>
+{% empty %}
+  <div class="row post">
+    <div class="col-sm-12">
+      <p>Results were not found.</p>
     </div>
-  {% empty %}
-    <div class="row post">
-      <div class="col-sm-12">
-        <p>Results were not found.</p>
-      </div>
-    <div>
-  {% endfor %}
-  {% include "_pagination.html" %}
+  <div>
+{% endfor %}
+{% include "_pagination.html" %}
+</div>
 {% endblock content %}
