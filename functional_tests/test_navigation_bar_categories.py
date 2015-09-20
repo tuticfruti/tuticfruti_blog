@@ -6,9 +6,18 @@ from .base import FunctionalTest
 
 from tuticfruti_blog.core import settings
 from tuticfruti_blog.posts import models
+from tuticfruti_blog.users.models import User
 
 
 class NavigationBarCategoriesTest(FunctionalTest):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user = User.objects.create(
+            username='tuticfruti',
+            email='tuticfruti@example.com',
+            password='1234')
+
     def setUp(self):
         self.driver = webdriver.Chrome()
         self.home_page = HomePage(self.driver, self.live_server_url)
@@ -43,13 +52,16 @@ class NavigationBarCategoriesTest(FunctionalTest):
     def test_filter_by_category_id(self):
         models.Post.objects.create(
             title='Post title {}'.format(settings.PYTHON_CATEGORY),
-            category_id=settings.PYTHON_CATEGORY)
+            category_id=settings.PYTHON_CATEGORY,
+            author=self.user)
         models.Post.objects.create(
             title='Post title {}'.format(settings.DJANGO_CATEGORY),
-            category_id=settings.DJANGO_CATEGORY)
+            category_id=settings.DJANGO_CATEGORY,
+            author=self.user)
         models.Post.objects.create(
             title='Post title {}'.format(settings.MISCELLANEOUS_CATEGORY),
-            category_id=settings.MISCELLANEOUS_CATEGORY)
+            category_id=settings.MISCELLANEOUS_CATEGORY,
+            author=self.user)
 
         # User selects Python category
         self.home_page.select_category(settings.PYTHON_CATEGORY)

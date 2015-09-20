@@ -14,6 +14,9 @@ class HomePage(BasePage):
     _container = page_elements.Container()
     _prev_link = page_elements.PrevLink()
     _next_link = page_elements.NextLink()
+    _search_form = page_elements.SearchForm()
+    _search_form_input = page_elements.SearchFormInput()
+    _search_form_button = page_elements.SearchFormButton()
 
     # Collections
     _posts = page_elements.PostCollection()
@@ -42,6 +45,12 @@ class HomePage(BasePage):
 
     def count_posts(self):
         return len(self._posts)
+
+    def search_posts(self, terms, category_id=None):
+        if category_id:
+            getattr(self, '_{}_category_link'.format(category_id)).click()
+        self._search_form_input = terms
+        self._search_form_button.click()
 
     def is_empty_message_visible(self):
         return 'Results were not found.' in self._container.text

@@ -14,9 +14,9 @@
     </ul>
   </div>
   <div class="col-xs-12 col-sm-5">
-    <form id="search-form" class="form-inline navbar-form pull-right">
+    <form id="search_form" action="{% if current_category_id %}{% url 'posts:search_category' current_category_id %}{% else %}{% url 'posts:search' %}{% endif %}" method="get" class="form-inline navbar-form pull-right">
       <div class="input-group">
-        <input type="text" class="form-control" placeholder="Search" aria-label="">
+        <input name="search_terms" type="text" class="form-control" placeholder="Search ..." value="{% if search_terms %}{{ search_terms }}{% endif %}" aria-label="">
         <span class="input-group-btn">
           <button class="btn btn-secondary" type="submit">Go!</button>
         </span>

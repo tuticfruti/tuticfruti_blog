@@ -6,9 +6,18 @@ from .base import FunctionalTest
 
 from tuticfruti_blog.core import settings
 from tuticfruti_blog.posts.models import Post
+from tuticfruti_blog.users.models import User
 
 
 class PaginationTest(FunctionalTest):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user = User.objects.create(
+            username='tuticfruti',
+            email='tuticfruti@example.com',
+            password='1234')
+
     def setUp(self):
         self.driver = webdriver.Chrome()
         self.home_page = HomePage(self.driver, self.live_server_url)
@@ -21,19 +30,19 @@ class PaginationTest(FunctionalTest):
 
     def test_orphans_posts(self):
         for i in range(settings.PAGINATE_BY + 1):
-            Post.objects.create(title='Post title {}'.format(i))
+            Post.objects.create(title='Post title {}'.format(i), author=self.user)
         self.home_page.reload()
         self.assertEqual(self.home_page.count_posts(), settings.PAGINATE_BY + 1)
 
     def test_max_number_of_posts_per_page(self):
         for i in range(settings.PAGINATE_BY + 2):
-            Post.objects.create(title='Post title {}'.format(i))
+            Post.objects.create(title='Post title {}'.format(i), author=self.user)
         self.home_page.reload()
         self.assertEqual(self.home_page.count_posts(), settings.PAGINATE_BY)
 
     def test_prev_next_buttons(self):
         for i in range(3*settings.PAGINATE_BY):
-            Post.objects.create(title='Post title {}'.format(i))
+            Post.objects.create(title='Post title {}'.format(i), author=self.user)
         self.home_page.reload()
 
         # Prev page link is not visible

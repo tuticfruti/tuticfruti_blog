@@ -37,3 +37,15 @@ class NextLink(WebElement):
 
 class PostCollection(WebElementCollection):
     _locator = locators.POSTS
+
+
+class SearchForm(WebElement):
+    _locator = locators.SEARCH_FORM
+
+
+class SearchFormInput(WebElement):
+    _locator = locators.SEARCH_FORM_INPUT
+
+
+class SearchFormButton(WebElement):
+    _locator = locators.SEARCH_FORM_BUTTON

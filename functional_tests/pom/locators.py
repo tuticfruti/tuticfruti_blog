@@ -9,5 +9,8 @@ MISCELLANEOUS_CATEGORY_LINK = (By.XPATH, '//nav[@id="navbar-top"]//ul[contains(@
 PREV_LINK = (By.XPATH, '//nav[@id="pagination"]//li[contains(@class, "pager-prev")]/a')
 NEXT_LINK = (By.XPATH, '//nav[@id="pagination"]//li[contains(@class, "pager-next")]/a')
 CONTAINER = (By.XPATH, '//div[contains(@class, "container")]')
+SEARCH_FORM = (By.XPATH, '//form[@id="search_form"]')
+SEARCH_FORM_INPUT = (By.XPATH, '//form[@id="search_form"]//input')
+SEARCH_FORM_BUTTON = (By.XPATH, '//form[@id="search_form"]//button')
 
 POSTS = (By.XPATH, '//div[contains(@class, "post")]')
