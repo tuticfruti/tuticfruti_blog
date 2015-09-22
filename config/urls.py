@@ -6,10 +6,10 @@ from django.conf.urls import include, url
 from django.conf.urls.static import static
 from django.contrib import admin
 
-from tuticfruti_blog.posts.views import PostListView
+from tuticfruti_blog.posts import views
 
 urlpatterns = [
-    url(r'^$', PostListView.as_view(), name="home"),
+    url(r'^$', views.PostListView.as_view(), name="home"),
 
     # Django Admin
     url(r'^admin/', include(admin.site.urls)),

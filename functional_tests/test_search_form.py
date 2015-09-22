@@ -4,9 +4,9 @@ from selenium import webdriver
 from django.core.urlresolvers import reverse
 
 from .base import FunctionalTest
-from .pom.pages.home_page import HomePage
-from tuticfruti_blog.posts import models
-from tuticfruti_blog.users.models import User
+from .pom import pages
+from tuticfruti_blog.posts import factories
+from tuticfruti_blog.users.factories import UserFactory
 from tuticfruti_blog.core import settings
 
 
@@ -14,36 +14,39 @@ class SearchFormTest(FunctionalTest):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.user = User.objects.create(
-            username='tuticfruti',
-            email='tuticfruti@example.com',
-            password='1234')
+        cls.driver = webdriver.Chrome()
+        cls.user = UserFactory()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.driver.quit()
+        super().tearDownClass()
 
     def setUp(self):
-        self.driver = webdriver.Chrome()
-        self.home_page = HomePage(self.driver, self.live_server_url + reverse('home'))
+        self.home_page = pages.HomePage(self.driver, self.live_server_url)
 
     def tearDown(self):
-        self.driver.quit()
+        pass
 
     def test_search_terms_with_and_without_category_selected(self):
-        python_post = models.Post.objects.create(
+        factories.PostFactory(
+            author=self.user,
             title='Post title {}'.format(settings.PYTHON_CATEGORY),
+            status_id=settings.POST_PUBLIC_STATUS,
             category_id=settings.PYTHON_CATEGORY,
-            author=self.user)
-        python_post.tags.create(term=settings.PYTHON_CATEGORY)
-
-        django_post = models.Post.objects.create(
+            tags=[factories.TagFactory.build(term=settings.PYTHON_CATEGORY)])
+        factories.PostFactory(
+            author=self.user,
             title='Post title {}'.format(settings.DJANGO_CATEGORY),
+            status_id=settings.POST_PUBLIC_STATUS,
             category_id=settings.DJANGO_CATEGORY,
-            author=self.user)
-        django_post.tags.create(term=settings.DJANGO_CATEGORY)
-
-        miscellaneous_post = models.Post.objects.create(
+            tags=[factories.TagFactory.build(term=settings.DJANGO_CATEGORY)])
+        factories.PostFactory(
+            author=self.user,
             title='Post title {}'.format(settings.MISCELLANEOUS_CATEGORY),
+            status_id=settings.POST_PUBLIC_STATUS,
             category_id=settings.MISCELLANEOUS_CATEGORY,
-            author=self.user)
-        miscellaneous_post.tags.create(term=settings.MISCELLANEOUS_CATEGORY)
+            tags=[factories.TagFactory.build(term=settings.MISCELLANEOUS_CATEGORY)])
         self.home_page.reload()
 
         # User searchs on All posts

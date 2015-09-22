@@ -49,3 +49,23 @@ class SearchFormInput(WebElement):
 
 class SearchFormButton(WebElement):
     _locator = locators.SEARCH_FORM_BUTTON
+
+
+class CommentForm(WebElement):
+    _locator = locators.COMMENT_FORM
+
+
+class NameInput(WebElement):
+    _locator = locators.NAME_INPUT
+
+
+class EmailInput(WebElement):
+    _locator = locators.EMAIL_INPUT
+
+
+class ContentTextarea(WebElement):
+    _locator = locators.CONTENT_TEXTAREA
+
+
+class CommentCollection(WebElementCollection):
+    _locator = locators.COMMENTS

@@ -1,29 +1,31 @@
 # -*- coding: utf-8 -*-
 from selenium import webdriver
 
-from .pom.pages.home_page import HomePage
+from .pom import pages
 from .base import FunctionalTest
 
 from tuticfruti_blog.core import settings
-from tuticfruti_blog.posts import models
-from tuticfruti_blog.users.models import User
+from tuticfruti_blog.users.factories import UserFactory
+from tuticfruti_blog.posts import factories
 
 
 class NavigationBarCategoriesTest(FunctionalTest):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.user = User.objects.create(
-            username='tuticfruti',
-            email='tuticfruti@example.com',
-            password='1234')
+        cls.driver = webdriver.Chrome()
+        cls.user = UserFactory()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.driver.quit()
+        super().tearDownClass()
 
     def setUp(self):
-        self.driver = webdriver.Chrome()
-        self.home_page = HomePage(self.driver, self.live_server_url)
+        self.home_page = pages.HomePage(self.driver, self.live_server_url)
 
     def tearDown(self):
-        self.driver.quit()
+        pass
 
     def test_current_active_category(self):
         # Firs time, all categories are disabled
@@ -50,16 +52,19 @@ class NavigationBarCategoriesTest(FunctionalTest):
         self.assertFalse(self.home_page.is_category_enabled(settings.MISCELLANEOUS_CATEGORY))
 
     def test_filter_by_category_id(self):
-        models.Post.objects.create(
+        factories.PostFactory(
             title='Post title {}'.format(settings.PYTHON_CATEGORY),
+            status_id=settings.POST_PUBLIC_STATUS,
             category_id=settings.PYTHON_CATEGORY,
             author=self.user)
-        models.Post.objects.create(
+        factories.PostFactory(
             title='Post title {}'.format(settings.DJANGO_CATEGORY),
+            status_id=settings.POST_PUBLIC_STATUS,
             category_id=settings.DJANGO_CATEGORY,
             author=self.user)
-        models.Post.objects.create(
+        factories.PostFactory(
             title='Post title {}'.format(settings.MISCELLANEOUS_CATEGORY),
+            status_id=settings.POST_PUBLIC_STATUS,
             category_id=settings.MISCELLANEOUS_CATEGORY,
             author=self.user)
 

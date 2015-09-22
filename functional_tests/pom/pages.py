@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 import re
 
+from selenium.common.exceptions import TimeoutException
+
 from .base_page import BasePage
-from .. import page_elements
+from . import page_elements
 
 
 class HomePage(BasePage):
@@ -20,9 +22,6 @@ class HomePage(BasePage):
 
     # Collections
     _posts = page_elements.PostCollection()
-
-    def __init__(self, driver, url):
-        super().__init__(driver, url)
 
     @property
     def current_page(self):
@@ -56,10 +55,16 @@ class HomePage(BasePage):
         return 'Results were not found.' in self._container.text
 
     def is_prev_link_visible(self):
-        return self._prev_link is not None
+        try:
+            return self._prev_link is not None
+        except TimeoutException:
+            return
 
     def is_next_link_visible(self):
-        return self._next_link is not None
+        try:
+            return self._next_link is not None
+        except TimeoutException:
+            return
 
     def goto_next_page(self):
         self._next_link.click()
@@ -74,3 +79,35 @@ class HomePage(BasePage):
             created=post.find_element_by_class_name('post_created').text,
             content=post.find_element_by_class_name('post_content').text,
             tags=post.find_element_by_class_name('post_tags').text, )
+
+    def goto_post(self, title):
+        for post in self._posts:
+            if post.text == title:
+                read_more_link = post.find_element_by_class_name('post_read_more')
+                read_more_link.click()
+                break
+
+    def is_post_displayed(self, title):
+        pass
+
+
+class PostPage(BasePage):
+    # Elements
+    _comment_form = page_elements.CommentForm()
+    _name_input = page_elements.NameInput()
+    _email_input = page_elements.EmailInput()
+    _comment_textarea = page_elements.ContentTextarea()
+
+    # Collections
+    _comments = page_elements.CommentCollection()
+
+    def send_comment_form(self, comment):
+        self._name_input = comment.name
+        self._email_input = comment.email
+        self._comment_textarea = comment.content
+        self._comment_form.find_element_by_tag_name('button').click()
+
+    def is_comment_displayed(self, content):
+        for comment in self._comments:
+            if (comment.text == content):
+                return True
