@@ -1,3 +1,6 @@
+# Posts
+POST_TEXT_CONTENT_LIMIT = 255
+
 # Pagination
 PAGINATE_BY = 10
 PAGINATE_ORPHANS = 1
@@ -30,6 +33,7 @@ CATEGORY_CHOICES = (
     (MISCELLANEOUS_CATEGORY, 'Miscellaneous'),
 )
 
+# Factories
 FUZZY_TEXTS = [
     'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Nam cursus. Morbi ut mi. Nullam enim leo, egestas id, condimentum at, laoreet mattis, massa.',
     'Sed eleifend nonummy diam. Praesent mauris ante, elementum et, bibendum at, posuere sit amet, nibh. Duis tincidunt lectus quis dui viverra vestibulum.',

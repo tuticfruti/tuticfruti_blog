@@ -55,8 +55,8 @@ class CommentForm(WebElement):
     _locator = locators.COMMENT_FORM
 
 
-class NameInput(WebElement):
-    _locator = locators.NAME_INPUT
+class AuthorInput(WebElement):
+    _locator = locators.AUTHOR_INPUT
 
 
 class EmailInput(WebElement):
@@ -69,3 +69,7 @@ class ContentTextarea(WebElement):
 
 class CommentCollection(WebElementCollection):
     _locator = locators.COMMENTS
+
+
+class PostDetails(WebElement):
+    _locator = locators.POST_DETAILS

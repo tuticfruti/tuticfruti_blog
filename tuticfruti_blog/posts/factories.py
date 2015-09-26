@@ -11,16 +11,6 @@ from tuticfruti_blog.users import factories
 from . import models
 
 
-class CommentFactory(factory.DjangoModelFactory):
-    class Meta:
-        model = models.Comment
-
-    name = factory.Sequence(lambda n: 'user{}'.format(n))
-    email = factory.LazyAttribute(lambda obj: '{}.example.com'.format(obj.name))
-    status_id = factory.fuzzy.FuzzyChoice([status_id for status_id, status_name in settings.COMMENT_STATUS_CHOICES])
-    content = factory.fuzzy.FuzzyChoice(settings.FUZZY_TEXTS)
-
-
 class TagFactory(factory.DjangoModelFactory):
     class Meta:
         model = models.Tag
@@ -37,8 +27,6 @@ class PostFactory(factory.DjangoModelFactory):
     status_id = factory.fuzzy.FuzzyChoice([status_id for status_id, status_name in settings.POST_STATUS_CHOICES])
     title = factory.Sequence(lambda n: 'Post title {}'.format(n))
     content = factory.fuzzy.FuzzyChoice(settings.FUZZY_TEXTS)
-    created = factory.fuzzy.FuzzyDateTime(datetime.datetime(2015, 1, 1, tzinfo=timezone.get_current_timezone()))
-    modified = factory.LazyAttribute(lambda obj: obj.created)
 
     @factory.post_generation
     def tags(self, create, extracted, **kwargs):
@@ -48,3 +36,14 @@ class PostFactory(factory.DjangoModelFactory):
         if extracted:
             for tag in extracted:
                 self.tags.create(term=tag.term)
+
+
+class CommentFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = models.Comment
+
+    post = factory.SubFactory(PostFactory)
+    author = factory.Sequence(lambda n: 'user{}'.format(n))
+    email = factory.LazyAttribute(lambda obj: '{}@example.com'.format(obj.author))
+    status_id = factory.fuzzy.FuzzyChoice([status_id for status_id, status_name in settings.COMMENT_STATUS_CHOICES])
+    content = factory.fuzzy.FuzzyChoice(settings.FUZZY_TEXTS)

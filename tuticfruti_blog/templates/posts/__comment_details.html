@@ -1,0 +1,22 @@
+{% load static %}
+
+<div id="{{ comment.pk }}" class="media comment">
+
+  <!-- Comment author -->
+  <div class="media-left">
+    <img class="media-object" src="{% static 'images/img.png' %}" alt="Created by {{ comment.author }}">
+  </div>
+
+  <div class="media-body">
+
+    <!-- Comment author and reated date-->
+    <div class="text-muted small">
+      <em>Created by</em> <strong class="author">{{ comment.author }}</strong>, <strong class="created">{{ comment.created|date:'F j, Y' }}</strong>.
+    </div>
+
+    <!-- Comment content -->
+    <div class="content">{{ comment.content }}</div>
+
+  </div>
+
+</div>

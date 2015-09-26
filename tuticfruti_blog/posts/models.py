@@ -7,17 +7,6 @@ from tuticfruti_blog.users.models import User
 from tuticfruti_blog.core import settings
 
 
-class Comment(models.Model):
-    status_id = models.CharField(
-        choices=settings.COMMENT_STATUS_CHOICES,
-        default=settings.COMMENT_PENDING_STATUS,
-        max_length=10,
-        db_index=True)
-    name = models.CharField(max_length=100)
-    email = models.EmailField()
-    content = models.TextField()
-
-
 class Tag(models.Model):
     term = models.CharField(max_length=255, unique=True)
 
@@ -27,7 +16,7 @@ class Tag(models.Model):
 
 class Post(models.Model):
     author = models.ForeignKey(User)
-    title = models.CharField(max_length=255, db_index=True)
+    title = models.CharField(max_length=255, unique=True)
     slug = models.CharField(max_length=255, unique=True)
     content = models.TextField(blank=True)
     status_id = models.CharField(
@@ -38,7 +27,8 @@ class Post(models.Model):
     category_id = models.CharField(
         choices=settings.CATEGORY_CHOICES,
         default=settings.PYTHON_CATEGORY,
-        max_length=20)
+        max_length=20,
+        db_index=True)
     tags = models.ManyToManyField(Tag)
     created = models.DateTimeField(auto_now_add=True, blank=True, db_index=True)
     modified = models.DateTimeField(auto_now=True, blank=True, db_index=True)
@@ -48,7 +38,24 @@ class Post(models.Model):
         super(Post, self).save(*args, **kwargs)
 
     def get_absolute_url(self):
-        return reverse('posts:detail', kwargs={'slug': self.slug})
+        return reverse('posts:details', kwargs={'slug': self.slug})
 
     def __str__(self):
         return self.title
+
+
+class Comment(models.Model):
+    post = models.ForeignKey(Post)
+    status_id = models.CharField(
+        choices=settings.COMMENT_STATUS_CHOICES,
+        default=settings.COMMENT_PENDING_STATUS,
+        max_length=10,
+        db_index=True)
+    author = models.CharField(max_length=100, db_index=True)
+    email = models.EmailField(db_index=True)
+    content = models.TextField()
+    created = models.DateTimeField(auto_now_add=True, blank=True, db_index=True)
+    modified = models.DateTimeField(auto_now=True, blank=True, db_index=True)
+
+    def __str__(self):
+        return self.content

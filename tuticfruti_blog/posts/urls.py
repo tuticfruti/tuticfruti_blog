@@ -13,7 +13,7 @@ urlpatterns = [
     # ex: /posts/python/
     url(r'^(?P<category_id>[a-z]+)/$', views.PostListByCategoryView.as_view(), name='list_category'),
     # ex: /posts/post-title-0/
-    url(r'^(?P<slug>[-\w]+)/$', views.PostListByCategoryView.as_view(), name='detail'),
+    url(r'^(?P<slug>[-\w]+)/$', views.PostDetailView.as_view(), name='details'),
     # ex: /posts/1/
-    url(r'^(?P<pk>[0-9]+)/$', views.PostListByCategoryView.as_view(), name='detail'),
+    url(r'^(?P<pk>[0-9]+)/$', views.PostDetailView.as_view(), name='details'),
 ]

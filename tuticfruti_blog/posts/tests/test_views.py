@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
+import unittest
 from unittest import mock
 
 from django.core.urlresolvers import reverse
-from django.test import TestCase
+from django import test
 
 from .. import views
 from .. import factories
@@ -10,14 +11,13 @@ from tuticfruti_blog.core import settings
 from tuticfruti_blog.users.factories import UserFactory
 
 
-class PostListViewTest(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.user = UserFactory()
-
+class PostListViewTest(test.TransactionTestCase):
     def setUp(self):
-        pass
+        self.user = UserFactory()
+        self.post = factories.PostFactory(
+            author=self.user,
+            status_id=settings.POST_PUBLIC_STATUS,
+            content=settings.FUZZY_TEXTS[5])
         self.res = self.client.get(reverse('home'))
 
     #
@@ -30,19 +30,39 @@ class PostListViewTest(TestCase):
     def test_url_conf_resolver(self):
         self.assertEqual(self.res.resolver_match.func.__name__, views.PostListView.as_view().__name__)
 
-    def test_object_list_in_context_data(self):
-        self.assertIn('post_list', self.res.context_data)
+    def test_post_variable_is_available_in_context_data(self):
+        self.assertIn('posts', self.res.context_data)
+        self.assertEqual(len(self.res.context_data['posts']), 1)
+
+    def test_post_text_content_limit_variable_is_available_in_context_data(self):
+        self.assertIn('post_text_content_limit', self.res.context_data)
+        self.assertIn('post_text_content_limit', self.res.context_data)
 
     def test_template_name(self):
-        self.assertIn('posts/home.html', self.res.template_name)
+        self.assertIn('posts/list.html', self.res.template_name)
 
-    @mock.patch('tuticfruti_blog.posts.views.models.Post.objects.filter')
-    def test_get_queryset_method(self, mock_filter):
+    def test_get_context_data_method(self):
+        self.assertEqual(
+            self.res.context_data.get('post_text_content_limit'),
+            settings.POST_TEXT_CONTENT_LIMIT)
+
+    def test_posts_num_comments_annotation(self):
+        post = factories.PostFactory(author=self.user, title='test_posts_num_comments_annotation')
+        factories.CommentFactory.create_batch(5, post=post)
+        res = self.client.get(reverse('home'))
+
+        for post in res.context_data.get('posts'):
+            if post.title == 'test_posts_num_comments_annotation':
+                self.assertEqual(post.num_comments, 5)
+
+    @mock.patch('tuticfruti_blog.posts.views.models')
+    def test_get_queryset_method(self, mock_models):
         views.PostListView.get_queryset(mock.Mock(
+            spec=views.PostListView,
             kwargs=dict(),
             request=mock.Mock(GET=dict())))
-
-        self.assertIsNone(mock_filter.assert_called_once_with(status_id=settings.POST_PUBLIC_STATUS))
+        self.assertTrue(mock_models.Post.objects.annotate.called)
+        self.assertIsNone(mock_models.Post.objects.annotate().filter.assert_called_once_with(status_id=settings.POST_PUBLIC_STATUS))
 
     #
     #   Integrated tests
@@ -61,21 +81,20 @@ class PostListViewTest(TestCase):
         factories.PostFactory.create_batch(10, author=self.user, status_id=settings.POST_PUBLIC_STATUS)
 
         res = self.client.get(reverse('home'))
-        posts = res.context_data.get('post_list')
+        posts = res.context_data.get('posts')
         prev_post = None
-        for post in posts:
+
+        for current_post in posts:
             if prev_post:
-                self.assertGreaterEqual(post.created, prev_post.created)
-                prev_post = post
+                self.assertGreaterEqual(prev_post.created, current_post.created)
+                prev_post = current_post
+            else:
+                prev_post = current_post
 
 
-class PostListByCategoryViewTest(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.user = UserFactory()
-
+class PostListByCategoryViewTest(test.TransactionTestCase):
     def setUp(self):
+        self.user = UserFactory()
         self.res = self.client.get(
             reverse('posts:list_category', kwargs=dict(category_id=settings.PYTHON_CATEGORY)))
 
@@ -89,26 +108,34 @@ class PostListByCategoryViewTest(TestCase):
     def test_url_conf_resolver(self):
         self.assertEqual(self.res.resolver_match.func.__name__, views.PostListByCategoryView.as_view().__name__)
 
-    def test_object_list_in_context_data(self):
-        self.assertIn('post_list', self.res.context_data)
-
-    def test_active_category_link_in_context_data(self):
+    def test_current_category_id_variable_is_available_in_context_data(self):
         self.assertIsNotNone(self.res.context_data.get('current_category_id'))
-
-    def test_template_name(self):
-        self.assertIn('posts/home.html', self.res.template_name)
-
-    def test_get_context_data_method(self):
         self.assertEqual(self.res.context_data.get('current_category_id'), settings.PYTHON_CATEGORY)
 
-    @mock.patch('tuticfruti_blog.posts.views.models')
-    def test_get_queryset_method(self, mock_models):
-        views.PostListByCategoryView.get_queryset(mock.Mock(
+    def test_template_name(self):
+        self.assertIn('posts/list.html', self.res.template_name)
+
+    @mock.patch('tuticfruti_blog.posts.views.PostListView.get_queryset')
+    def test_get_queryset_method(self, mock_parent_get_queryset):
+        mock_parent_get_queryset.return_value = mock.Mock(
+            filter=mock.Mock(return_value=mock.sentinel.queryset))
+
+        # Without category
+        return_value = views.PostListByCategoryView.get_queryset(mock.Mock(
+            spec=views.PostListByCategoryView,
+            kwargs=dict(),
+            request=mock.Mock(GET=dict())))
+
+        self.assertEqual(return_value, mock_parent_get_queryset.return_value)
+
+        # With category
+        return_value = views.PostListByCategoryView.get_queryset(mock.Mock(
+            spec=views.PostListByCategoryView,
             kwargs=dict(category_id=settings.PYTHON_CATEGORY),
             request=mock.Mock(GET=dict())))
 
-        self.assertIsNone(mock_models.Post.objects.filter.assert_called_once_with(
-            status_id=settings.POST_PUBLIC_STATUS,
+        self.assertEqual(return_value, mock.sentinel.queryset)
+        self.assertIsNone(mock_parent_get_queryset().filter.assert_called_once_with(
             category_id=settings.PYTHON_CATEGORY))
 
     #
@@ -131,94 +158,48 @@ class PostListByCategoryViewTest(TestCase):
         self.assertNotContains(res, post.title)
 
 
-class PostListSearchViewTest(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.user = UserFactory()
-        cls.terms = '{} {}'.format(settings.PYTHON_CATEGORY, settings.DJANGO_CATEGORY)
-
+class PostListSearchViewTest(test.TransactionTestCase):
     def setUp(self):
-        # /search?search_terms=python django
-        self.res_search = self.client.get(
+        self.user = UserFactory()
+        self.terms = [settings.PYTHON_CATEGORY, settings.DJANGO_CATEGORY]
+        self.res = self.client.get(
             reverse('posts:search'),
-            dict(search_terms=self.terms))
-
-        #<category_id>/search?search_terms=python django
-        self.res_search_category = self.client.get(
-            reverse('posts:search_category', kwargs=dict(category_id=settings.PYTHON_CATEGORY)),
-            dict(search_terms=self.terms))
+            dict(search_terms='{} {}'.format(*self.terms)))
 
     #
     # Unit tests
     #
 
     def test_http_request_ok(self):
-        self.assertEqual(self.res_search.status_code, 200)
-        self.assertEqual(self.res_search_category.status_code, 200)
+        self.assertEqual(self.res.status_code, 200)
 
     def test_url_conf_resolver(self):
         self.assertEqual(
-            self.res_search.resolver_match.func.__name__,
-            views.PostListSearchView.as_view().__name__)
-        self.assertEqual(
-            self.res_search_category.resolver_match.func.__name__,
+            self.res.resolver_match.func.__name__,
             views.PostListSearchView.as_view().__name__
         )
 
-    def test_object_list_in_context_data(self):
-        self.assertIn('post_list', self.res_search.context_data)
-        self.assertIn('post_list', self.res_search_category.context_data)
-
-    def test_active_category_link_in_context_data(self):
-        self.assertIsNone(self.res_search.context_data.get('current_category_id'))
-        self.assertIsNotNone(self.res_search_category.context_data.get('current_category_id'))
-
     def test_template_name(self):
-        self.assertIn('posts/home.html', self.res_search.template_name)
-        self.assertIn('posts/home.html', self.res_search_category.template_name)
+        self.assertIn('posts/list.html', self.res.template_name)
 
-    def test_get_context_data_method(self):
-        self.assertIsNone(self.res_search.context_data.get('current_category_id'))
-        self.assertEqual(
-            self.res_search_category.context_data.get('current_category_id'),
-            settings.PYTHON_CATEGORY)
+    def test_search_terms_variable_is_available_in_context_data(self):
+        self.assertIsNotNone(self.res.context_data.get('search_terms'))
+        self.assertEqual(self.res.context_data.get('search_terms'), '{} {}'.format(*self.terms))
 
-    @mock.patch('tuticfruti_blog.posts.views.models')
-    def test_get_queryset_method(self, mock_models):
-        views.PostListSearchView.get_queryset(mock.Mock(
+    @mock.patch('tuticfruti_blog.posts.views.PostListByCategoryView.get_queryset')
+    def test_get_queryset_method(self, mock_parent_get_queryset):
+        mock_parent_get_queryset.return_value = mock.Mock(filter=mock.Mock(
+            return_value=mock.Mock(distinct=mock.Mock(
+                return_value=mock.sentinel.queryset))))
+
+        return_value = views.PostListSearchView.get_queryset(mock.Mock(
+            spec=views.PostListSearchView,
             kwargs=dict(),
-            request=mock.Mock(GET=dict(search_terms=self.terms))))
+            request=mock.Mock(GET=dict(search_terms='{} {}'.format(*self.terms)))))
 
-        self.assertIsNone(mock_models.Post.objects.filter.assert_called_once_with(
-            status_id=settings.POST_PUBLIC_STATUS,
-            tags__term__in=self.terms.split()))
-
-        mock_models.reset_mock()
-        views.PostListSearchView.get_queryset(mock.Mock(
-            kwargs=dict(category_id=settings.PYTHON_CATEGORY),
-            request=mock.Mock(GET=dict(search_terms=self.terms))))
-
-        self.assertIsNone(mock_models.Post.objects.filter.assert_called_once_with(
-            category_id=settings.PYTHON_CATEGORY,
-            status_id=settings.POST_PUBLIC_STATUS,
-            tags__term__in=self.terms.split()))
-
-    def test_search_terms_in_context_data(self):
-        terms = 'term1 term2 term3'
-        res = self.client.get(
-            reverse('posts:search', kwargs=dict()),
-            dict(search_terms=terms))
-
-        self.assertEqual(res.context_data.get('search_terms'), terms)
-        self.assertContains(res, terms)
-
-        res = self.client.get(
-            reverse('posts:search_category', kwargs=dict(category_id=settings.PYTHON_CATEGORY)),
-            dict(search_terms=terms))
-
-        self.assertEqual(res.context_data.get('search_terms'), terms)
-        self.assertContains(res, terms)
+        self.assertEqual(return_value, mock.sentinel.queryset)
+        self.assertIsNone(mock_parent_get_queryset().filter.assert_called_once_with(
+            tags__term__in=self.terms))
 
     #
     # Integrated tests
@@ -233,7 +214,7 @@ class PostListSearchViewTest(TestCase):
             reverse('posts:search', kwargs=dict()),
             dict(search_terms='{} {}'.format(tag1.term, tag2.term)))
 
-        self.assertEqual(len(res.context_data['post_list']), 1)
+        self.assertEqual(len(res.context_data['posts']), 1)
 
     def test_search_category_filter_by_category(self):
         python_post = factories.PostFactory(
@@ -251,20 +232,63 @@ class PostListSearchViewTest(TestCase):
             reverse('posts:search_category', kwargs=dict(category_id=settings.PYTHON_CATEGORY)),
             dict(search_terms=tag.term))
 
-        self.assertEqual(len(res.context_data['post_list']), 1)
+        self.assertEqual(len(res.context_data['posts']), 1)
 
-    def test_only_public_posts_are_displayed(self):
-        post = factories.PostFactory(
-            author=self.user,
-            title='Draft posts should not be displayed.',
-            status_id=settings.POST_DRAFT_STATUS)
 
-        res = self.client.get(
-            reverse('posts:search', kwargs=dict()),
-            dict(search_terms='any_term'))
-        self.assertNotContains(res, post.title)
+class PostDetailViewTest(test.TransactionTestCase):
+    def setUp(self):
+        self.user = UserFactory()
+        self.post = factories.PostFactory(author=self.user, status_id=settings.POST_PUBLIC_STATUS)
+        self.res = self.client.get(reverse('posts:details', kwargs=dict(slug=self.post.slug)))
 
-        res = self.client.get(
-            reverse('posts:search_category', kwargs=dict(category_id=settings.PYTHON_CATEGORY)),
-            dict(search_terms='any_term'))
-        self.assertNotContains(res, post.title)
+    #
+    # Unit tests
+    #
+
+    def test_http_request_ok(self):
+        self.assertEqual(self.res.status_code, 200)
+
+    def test_url_conf_resolver(self):
+        self.assertEqual(self.res.resolver_match.func.__name__, views.PostDetailView.as_view().__name__)
+
+    def test_post_variable_is_available_in_context_data(self):
+        self.assertIn('comments', self.res.context_data)
+
+    def test_author_variable_is_available_in_context_data(self):
+        self.assertIn('author', self.res.context_data)
+
+    def test_email_variable_is_available_in_context_data(self):
+        self.assertIn('email', self.res.context_data)
+
+    def test_content_variable_is_available_in_context_data(self):
+        self.assertIn('content', self.res.context_data)
+
+    def test_template_name(self):
+        self.assertIn('posts/details.html', self.res.template_name)
+
+    def test_comment_form_is_valid(self):
+        self.fail('test_comment_form_is_valid FAULT')
+
+    #
+    # Integrated tests
+    #
+
+    def test_create_new_comment(self):
+        self.client.post(
+            reverse('posts:details', kwargs=dict(slug=self.post.slug)),
+            dict(author='user0', email='user0@example.com', content=settings.FUZZY_TEXTS[0]))
+
+        self.assertEqual(self.post.comment_set.count(), 1)
+
+    def test_coments_order_by_created_date(self):
+        comments = factories.CommentFactory.create_batch(10, post=self.post)
+        self.post.comment_set.add(*comments)
+        res = self.client.get(reverse('posts:details', kwargs=dict(slug=self.post.slug)))
+
+        prev_comment = None
+        for comment in res.context_data['comments']:
+            if prev_comment:
+                self.assertGreaterEqual(prev_comment.created, comment.created)
+                prev_comment = comment
+            else:
+                prev_comment = comment

@@ -3,12 +3,17 @@ import re
 
 from selenium.common.exceptions import TimeoutException
 
+from django.core.urlresolvers import reverse
+
 from .base_page import BasePage
 from . import page_elements
 
 
 class HomePage(BasePage):
-    # Elements
+    # Relative url
+    url_path = reverse('home')
+
+    # Web elements
     _home_page_link = page_elements.HomePageLink()
     _python_category_link = page_elements.PythonCategoryLink()
     _django_category_link = page_elements.DjangoCategoryLink()
@@ -20,12 +25,12 @@ class HomePage(BasePage):
     _search_form_input = page_elements.SearchFormInput()
     _search_form_button = page_elements.SearchFormButton()
 
-    # Collections
+    # Web element collections
     _posts = page_elements.PostCollection()
 
     @property
     def current_page(self):
-        regex = re.search(r'\?page\=([0-9]+)', self.current_url)
+        regex = re.search(r'\?page\=([0-9]+)', self.current_driver_url)
         try:
             return int(regex.group(1))
         except ValueError:
@@ -72,42 +77,89 @@ class HomePage(BasePage):
     def goto_prev_page(self):
         self._prev_link.click()
 
-    def get_post_details(self, key):
-        post = self._posts[key]
+    def goto_post(self, pk):
+        self.click_on_read_me_link(pk)
+
+    def click_on_read_me_link(self, pk):
+        post_element = self._driver.find_element_by_id(str(pk))
+        read_more_link = post_element.find_element_by_class_name('read_more')
+        read_more_link.click()
+
+    def click_on_num_comments_link(self, pk):
+        post_element = self._driver.find_element_by_id(str(pk))
+        comments_link = post_element.find_element_by_class_name('post_num_comments')
+        comments_link.click()
+
+    def _get_post_details(self, post_element):
         return dict(
-            title=post.find_element_by_class_name('post_title').text,
-            created=post.find_element_by_class_name('post_created').text,
-            content=post.find_element_by_class_name('post_content').text,
-            tags=post.find_element_by_class_name('post_tags').text, )
+            author=post_element.find_element_by_class_name('post_author').text,
+            title=post_element.find_element_by_class_name('post_title').text,
+            created=post_element.find_element_by_class_name('post_created').text,
+            content=post_element.find_element_by_class_name('post_content').text,
+            tags=post_element.find_element_by_class_name('post_tags').text,
+            num_comments=post_element.find_element_by_class_name('post_num_comments').text)
 
-    def goto_post(self, title):
-        for post in self._posts:
-            if post.text == title:
-                read_more_link = post.find_element_by_class_name('post_read_more')
-                read_more_link.click()
-                break
+    def get_post_details_by_pk(self, pk):
+        post_element = self._driver.find_element_by_id('posts').find_element_by_id(str(pk))
+        return self._get_post_details(post_element)
 
-    def is_post_displayed(self, title):
-        pass
+    def get_post_details_by_key(self, key):
+        post_element = self._posts[key]
+        return self._get_post_details(post_element)
 
 
-class PostPage(BasePage):
-    # Elements
+class PostDetailsPage(BasePage):
+    # Web elements
+    _post_details = page_elements.PostDetails()
     _comment_form = page_elements.CommentForm()
-    _name_input = page_elements.NameInput()
+    _author_input = page_elements.AuthorInput()
     _email_input = page_elements.EmailInput()
-    _comment_textarea = page_elements.ContentTextarea()
+    _content_textarea = page_elements.ContentTextarea()
 
-    # Collections
+    # Web element collections
     _comments = page_elements.CommentCollection()
 
-    def send_comment_form(self, comment):
-        self._name_input = comment.name
-        self._email_input = comment.email
-        self._comment_textarea = comment.content
+    def __init__(self, liver_server_url, slug):
+        self.url_path = reverse('posts:details', kwargs=dict(slug=slug))
+        super().__init__(liver_server_url)
+
+    def send_comment_form(self, author, email, content):
+        self._author_input = author
+        self._email_input = email
+        self._content_textarea = content
         self._comment_form.find_element_by_tag_name('button').click()
 
     def is_comment_displayed(self, content):
         for comment in self._comments:
             if (comment.text == content):
                 return True
+
+    def count_comments(self):
+        return len(self._comments)
+
+    def _get_comment_details(self, comment_element):
+        return dict(
+            created=comment_element.find_element_by_class_name('created').text,
+            author=comment_element.find_element_by_class_name('author').text,
+            content=comment_element.find_element_by_class_name('content').text)
+
+    def get_comment_details_by_key(self, key):
+        comment_element = self._comments[key]
+        return self._get_comment_details(comment_element)
+
+    def get_comment_details_by_pk(self, pk):
+        comment_element = self._driver.find_element_by_id('comments').find_element_by_id(str(pk))
+        return self._get_comment_details(comment_element)
+
+    def get_post_details(self):
+        post_element = self._driver.find_element_by_class_name('post')
+        return dict(
+            author=post_element.find_element_by_class_name('post_author').text,
+            title=post_element.find_element_by_class_name('post_title').text,
+            created=post_element.find_element_by_class_name('post_created').text,
+            content=post_element.find_element_by_class_name('post_content').text,
+            tags=post_element.find_element_by_class_name('post_tags').text,
+            num_comments=post_element.find_element_by_class_name('post_num_comments').text)
+
+    def is_empty_message_visible(self):
+        return 'Results were not found.' in self._driver.find_element_by_id('comments').text

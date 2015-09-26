@@ -1,20 +1,29 @@
 {% if is_paginated %}
-<div class="row">
-  <div class="col-xs-10 col-xs-push-1">
-    <nav id="pagination">
-      <ul class="pager">
-        {% if page_obj.has_previous %}
-        <li class="pager-prev">
-            <a href="?page={{ page_obj.previous_page_number }}">&larr; Newer posts</a>
-        </li>
-        {% endif %}
-        {% if page_obj.has_next %}
-        <li class="pager-next">
-            <a href="?page={{ page_obj.next_page_number }}">Older posts &rarr;</a>
-        </li>
-        {% endif %}
-      </ul>
-    </nav>
+  <div class="row">
+    <div class="col-sm-12">
+      <div id="pagination" class="row">
+        <div class="col-xs-10 col-xs-push-1">
+          <nav id="pagination">
+            <ul class="pager">
+
+              <!-- Newer posts link -->
+              {% if page_obj.has_previous %}
+                <li class="pager-prev">
+                    <a href="?page={{ page_obj.previous_page_number }}">&larr; Newer posts</a>
+                </li>
+              {% endif %}
+
+              <!-- Older posts link -->
+              {% if page_obj.has_next %}
+                <li class="pager-next">
+                    <a href="?page={{ page_obj.next_page_number }}">Older posts &rarr;</a>
+                </li>
+              {% endif %}
+
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </div>
   </div>
-</div>
 {% endif %}
