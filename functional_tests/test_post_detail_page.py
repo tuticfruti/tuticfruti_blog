@@ -24,26 +24,18 @@ class PostDetailsPageTest(FunctionalTest):
         self.post_details_page.close()
 
     def test_comments_order(self):
-        comment = factories.CommentFactory(
-            post=self.post,
-            author='anonymous1',
-            email='anonymous1@example.com',
-            content='Comment content 1')
-        another_comment = factories.CommentFactory(
-            post=self.post,
-            author='anonymous2',
-            email='anonymous2@example.com',
-            content='Comment content 2')
+        comment = factories.CommentFactory(post=self.post)
+        another_comment = factories.CommentFactory(post=self.post)
 
         comment.created = datetime.datetime(2015, 1, 1, tzinfo=timezone.get_current_timezone())
         comment.save()
-        another_comment.created = datetime.datetime(2015, 2, 1, tzinfo=timezone.get_current_timezone())
+        another_comment.created = datetime.datetime(
+            2015, 2, 1, tzinfo=timezone.get_current_timezone())
         another_comment.save()
         self.post_details_page.reload()
 
-        self.assertEqual(
-            self.post_details_page.get_comment_details_by_key(0).get('author'),
-            another_comment.author)
+        self.assertTrue(
+            'February' in self.post_details_page.get_comment_details_by_key(0).get('created'))
 
     def test_comment_details(self):
         comment = factories.CommentFactory(

@@ -96,7 +96,7 @@ class PostListByCategoryViewTest(test.TransactionTestCase):
     def setUp(self):
         self.user = UserFactory()
         self.res = self.client.get(
-            reverse('posts:list_category', kwargs=dict(category_id=settings.PYTHON_CATEGORY)))
+            reverse('posts:list_by_category', kwargs=dict(category_id=settings.PYTHON_CATEGORY)))
 
     #
     #   Unit tests
@@ -154,7 +154,7 @@ class PostListByCategoryViewTest(test.TransactionTestCase):
         res = self.client.get(reverse('posts:list', kwargs=dict()))
         self.assertNotContains(res, post.title)
 
-        res = self.client.get(reverse('posts:list_category', kwargs=dict(category_id=settings.PYTHON_CATEGORY)))
+        res = self.client.get(reverse('posts:list_by_category', kwargs=dict(category_id=settings.PYTHON_CATEGORY)))
         self.assertNotContains(res, post.title)
 
 
@@ -229,7 +229,7 @@ class PostListSearchViewTest(test.TransactionTestCase):
         python_post.tags.add(tag)
         django_post.tags.add(tag)
         res = self.client.get(
-            reverse('posts:search_category', kwargs=dict(category_id=settings.PYTHON_CATEGORY)),
+            reverse('posts:search_by_category', kwargs=dict(category_id=settings.PYTHON_CATEGORY)),
             dict(search_terms=tag.term))
 
         self.assertEqual(len(res.context_data['posts']), 1)
@@ -239,7 +239,7 @@ class PostDetailViewTest(test.TransactionTestCase):
     def setUp(self):
         self.user = UserFactory()
         self.post = factories.PostFactory(author=self.user, status_id=settings.POST_PUBLIC_STATUS)
-        self.res = self.client.get(reverse('posts:details', kwargs=dict(slug=self.post.slug)))
+        self.res = self.client.get(reverse('posts:detail', kwargs=dict(slug=self.post.slug)))
 
     #
     # Unit tests
@@ -254,17 +254,8 @@ class PostDetailViewTest(test.TransactionTestCase):
     def test_post_variable_is_available_in_context_data(self):
         self.assertIn('comments', self.res.context_data)
 
-    def test_author_variable_is_available_in_context_data(self):
-        self.assertIn('author', self.res.context_data)
-
-    def test_email_variable_is_available_in_context_data(self):
-        self.assertIn('email', self.res.context_data)
-
-    def test_content_variable_is_available_in_context_data(self):
-        self.assertIn('content', self.res.context_data)
-
     def test_template_name(self):
-        self.assertIn('posts/details.html', self.res.template_name)
+        self.assertIn('posts/detail.html', self.res.template_name)
 
     def test_comment_form_is_valid(self):
         self.fail('test_comment_form_is_valid FAULT')
@@ -275,7 +266,7 @@ class PostDetailViewTest(test.TransactionTestCase):
 
     def test_create_new_comment(self):
         self.client.post(
-            reverse('posts:details', kwargs=dict(slug=self.post.slug)),
+            reverse('posts:detail', kwargs=dict(slug=self.post.slug)),
             dict(author='user0', email='user0@example.com', content=settings.FUZZY_TEXTS[0]))
 
         self.assertEqual(self.post.comment_set.count(), 1)
@@ -283,7 +274,7 @@ class PostDetailViewTest(test.TransactionTestCase):
     def test_coments_order_by_created_date(self):
         comments = factories.CommentFactory.create_batch(10, post=self.post)
         self.post.comment_set.add(*comments)
-        res = self.client.get(reverse('posts:details', kwargs=dict(slug=self.post.slug)))
+        res = self.client.get(reverse('posts:detail', kwargs=dict(slug=self.post.slug)))
 
         prev_comment = None
         for comment in res.context_data['comments']:

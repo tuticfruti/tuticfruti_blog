@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <div class="container">
+  <div id="posts_id" class="container">
     {% for post in posts %}
-        {% include 'posts/_post_details.html' %}
+        {% include 'posts/_post_detail.html' %}
     {% empty %}
       <p>Results were not found.</p>
     {% endfor %}

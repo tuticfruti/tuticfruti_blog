@@ -1,4 +1,4 @@
-<div id="{{ post.pk }}" class="row post">
+<div id="post{{ post.pk }}_id" class="row post">
   <div class="col-sm-12">
 
     <!-- Post title -->
@@ -44,7 +44,7 @@
       <div class="col-sm-2">
         {% if posts %}
           <p>
-            <a class="read_more" href="{% url 'posts:details' post.slug %}">Read more ...</a>
+            <a class="read_more" href="{% url 'posts:detail' post.slug %}">Read more ...</a>
           </p>
         {% endif %}
       </div>
@@ -52,7 +52,7 @@
       <!-- Comments number -->
       <div class="col-sm-2 col-sm-push-8">
         <span>
-          <a class="post_num_comments label label-default label-pill" href="{% url 'posts:details' post.slug %}#comments" title="Goto comments">
+          <a class="post_num_comments label label-default label-pill" href="{% url 'posts:detail' post.slug %}#comments_id" title="Goto comments">
             {% if posts %}{{ post.num_comments }}{% else %}{{ comments|length }}{% endif %}</a>
         </span>
         <em class="small">comments</em>

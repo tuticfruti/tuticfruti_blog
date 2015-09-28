@@ -81,12 +81,12 @@ class HomePage(BasePage):
         self.click_on_read_me_link(pk)
 
     def click_on_read_me_link(self, pk):
-        post_element = self._driver.find_element_by_id(str(pk))
+        post_element = self._driver.find_element_by_id('post{}_id'.format(str(pk)))
         read_more_link = post_element.find_element_by_class_name('read_more')
         read_more_link.click()
 
     def click_on_num_comments_link(self, pk):
-        post_element = self._driver.find_element_by_id(str(pk))
+        post_element = self._driver.find_element_by_id('post{}_id'.format(str(pk)))
         comments_link = post_element.find_element_by_class_name('post_num_comments')
         comments_link.click()
 
@@ -100,7 +100,8 @@ class HomePage(BasePage):
             num_comments=post_element.find_element_by_class_name('post_num_comments').text)
 
     def get_post_details_by_pk(self, pk):
-        post_element = self._driver.find_element_by_id('posts').find_element_by_id(str(pk))
+        post_element = self._driver.find_element_by_id('posts_id').find_element_by_id(
+            'post{}_id'.format(str(pk)))
         return self._get_post_details(post_element)
 
     def get_post_details_by_key(self, key):
@@ -120,7 +121,7 @@ class PostDetailsPage(BasePage):
     _comments = page_elements.CommentCollection()
 
     def __init__(self, liver_server_url, slug):
-        self.url_path = reverse('posts:details', kwargs=dict(slug=slug))
+        self.url_path = reverse('posts:detail', kwargs=dict(slug=slug))
         super().__init__(liver_server_url)
 
     def send_comment_form(self, author, email, content):
@@ -148,7 +149,8 @@ class PostDetailsPage(BasePage):
         return self._get_comment_details(comment_element)
 
     def get_comment_details_by_pk(self, pk):
-        comment_element = self._driver.find_element_by_id('comments').find_element_by_id(str(pk))
+        comment_element = self._driver.find_element_by_id('comments_id').find_element_by_id(
+            'comment{}_id'.format(str(pk)))
         return self._get_comment_details(comment_element)
 
     def get_post_details(self):
@@ -162,4 +164,4 @@ class PostDetailsPage(BasePage):
             num_comments=post_element.find_element_by_class_name('post_num_comments').text)
 
     def is_empty_message_visible(self):
-        return 'Results were not found.' in self._driver.find_element_by_id('comments').text
+        return 'Results were not found.' in self._driver.find_element_by_id('comments_id').text

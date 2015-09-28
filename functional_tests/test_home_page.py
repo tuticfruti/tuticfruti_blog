@@ -33,7 +33,7 @@ class HomePageTest(FunctionalTest):
 
         self.assertEqual(
             self.home_page.current_driver_url,
-            '{}{}'.format(self.live_server_url, reverse('posts:details', kwargs=dict(slug=post.slug))))
+            '{}{}'.format(self.live_server_url, reverse('posts:detail', kwargs=dict(slug=post.slug))))
 
     def test_current_active_category(self):
         # Firs time, all categories are disabled
@@ -230,5 +230,8 @@ class HomePageTest(FunctionalTest):
         self.home_page.click_on_num_comments_link(post.pk)
 
         self.assertEqual(
-            '{}{}{}'.format(self.live_server_url, reverse('posts:details', kwargs=dict(slug=post.slug)), '#comments'),
+            '{}{}{}'.format(
+                self.live_server_url,
+                reverse('posts:detail', kwargs=dict(slug=post.slug)),
+                '#comments_id'),
             self.home_page.current_driver_url)

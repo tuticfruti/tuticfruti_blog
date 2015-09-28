@@ -1,12 +1,17 @@
 # -*- coding: utf-8 -*-
-from django.views.generic import ListView, DetailView
+from django.views import generic as generic_views
+from django.views.generic import detail as detail_mixins
+from django.views.generic import edit as edit_mixins
+
 from django.db.models import Count
+from django.core.urlresolvers import reverse
 
 from tuticfruti_blog.core import settings
 from . import models
+from . import forms
 
 
-class PostListView(ListView):
+class PostListView(generic_views.ListView):
     model = models.Post
     context_object_name = 'posts'
     template_name = 'posts/list.html'
@@ -52,26 +57,33 @@ class PostListSearchView(PostListByCategoryView):
         return context
 
 
-class PostDetailView(DetailView):
+class PostDetailView(edit_mixins.FormMixin, generic_views.DetailView):
     model = models.Post
+    template_name = 'posts/detail.html'
+    form_class = forms.CommentForm
     context_object_name = 'post'
-    template_name = 'posts/details.html'
 
-    def post(self, request, slug):
-        from django.http import HttpResponse
-        from django.core.urlresolvers import reverse
-        models.Comment.objects.create(
-            post=self.get_object(),
-            author=self.request.POST.get('author'),
-            email=self.request.POST.get('email'),
-            content=self.request.POST.get('content'))
-        return HttpResponse(reverse('posts:details', kwargs=dict(slug=slug)))
+    def get_success_url(self):
+        return reverse('posts:detail', kwargs=dict(slug=self.get_object().slug))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['author'] = self.request.POST.get('author')
-        context['email'] = self.request.POST.get('email')
-        context['content'] = self.request.POST.get('content')
+        context['form'] = self.get_form()
         context['comments'] = self.get_object().comment_set.all().order_by(settings.ORDERING)
-
         return context
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = self.get_form()
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+    def form_valid(self, form):
+        models.Comment.objects.create(
+            post=self.get_object(),
+            author=form['author'].value(),
+            email=form['email'].value(),
+            content=form['content'].value())
+        return super().form_valid(form)
