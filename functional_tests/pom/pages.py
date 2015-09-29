@@ -87,7 +87,7 @@ class HomePage(BasePage):
 
     def click_on_num_comments_link(self, pk):
         post_element = self._driver.find_element_by_id('post{}_id'.format(str(pk)))
-        comments_link = post_element.find_element_by_class_name('post_num_comments')
+        comments_link = post_element.find_element_by_class_name('comments__count')
         comments_link.click()
 
     def _get_post_details(self, post_element):
@@ -97,7 +97,7 @@ class HomePage(BasePage):
             created=post_element.find_element_by_class_name('post_created').text,
             content=post_element.find_element_by_class_name('post_content').text,
             tags=post_element.find_element_by_class_name('post_tags').text,
-            num_comments=post_element.find_element_by_class_name('post_num_comments').text)
+            num_comments=post_element.find_element_by_class_name('comments__count').text)
 
     def get_post_details_by_pk(self, pk):
         post_element = self._driver.find_element_by_id('posts_id').find_element_by_id(
@@ -132,7 +132,7 @@ class PostDetailsPage(BasePage):
 
     def is_comment_displayed(self, content):
         for comment in self._comments:
-            if (comment.text == content):
+            if comment.text == content:
                 return True
 
     def count_comments(self):
@@ -161,7 +161,7 @@ class PostDetailsPage(BasePage):
             created=post_element.find_element_by_class_name('post_created').text,
             content=post_element.find_element_by_class_name('post_content').text,
             tags=post_element.find_element_by_class_name('post_tags').text,
-            num_comments=post_element.find_element_by_class_name('post_num_comments').text)
+            num_comments=post_element.find_element_by_class_name('comments__count').text)
 
     def is_empty_message_visible(self):
         return 'Results were not found.' in self._driver.find_element_by_id('comments_id').text

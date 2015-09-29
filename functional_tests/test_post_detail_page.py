@@ -1,22 +1,26 @@
 # -*- coding: utf-8 -*-
 import datetime
 
+from selenium.common.exceptions import NoSuchElementException
+
 from django.utils import timezone
 
 from functional_tests.pom import pages
 from .base_page import FunctionalTest
 from tuticfruti_blog.core import settings
+from tuticfruti_blog.core import data_fixtures
 from tuticfruti_blog.users.factories import UserFactory
 from tuticfruti_blog.posts import factories
+from tuticfruti_blog.posts import models
 
 
-class PostDetailsPageTest(FunctionalTest):
+class PostDetailPageTest(FunctionalTest):
     def setUp(self):
         self.user = UserFactory()
         self.post = factories.PostFactory(
             author=self.user,
-            status_id=settings.POST_PUBLIC_STATUS,
-            content=settings.FUZZY_TEXTS[5])
+            status_id=models.Post.STATUS_PUBLISHED,
+            content=data_fixtures.FUZZY_TEXTS[5])
         self.post_details_page = pages.PostDetailsPage(self.live_server_url, self.post.slug)
         self.post_details_page.open()
 
@@ -24,8 +28,10 @@ class PostDetailsPageTest(FunctionalTest):
         self.post_details_page.close()
 
     def test_comments_order(self):
-        comment = factories.CommentFactory(post=self.post)
-        another_comment = factories.CommentFactory(post=self.post)
+        comment = factories.CommentFactory(
+            post=self.post, status_id=models.Comment.STATUS_PUBLISHED)
+        another_comment = factories.CommentFactory(
+            post=self.post, status_id=models.Comment.STATUS_PUBLISHED)
 
         comment.created = datetime.datetime(2015, 1, 1, tzinfo=timezone.get_current_timezone())
         comment.save()
@@ -40,6 +46,7 @@ class PostDetailsPageTest(FunctionalTest):
     def test_comment_details(self):
         comment = factories.CommentFactory(
             post=self.post,
+            status_id=models.Comment.STATUS_PUBLISHED,
             author='anonymous',
             email='anonymous@example.com',
             content='Comment content')
@@ -52,7 +59,8 @@ class PostDetailsPageTest(FunctionalTest):
         self.assertEqual(comment_element.get('content'), comment.content)
 
     def test_all_comments_are_present_comments(self):
-        factories.CommentFactory.create_batch(5, post=self.post)
+        factories.CommentFactory.create_batch(
+            5, post=self.post, status_id=models.Comment.STATUS_PUBLISHED)
         self.post_details_page.reload()
 
         self.assertEqual(self.post_details_page.count_comments(), 5)
@@ -69,7 +77,8 @@ class PostDetailsPageTest(FunctionalTest):
         self.post.tags.add(
             factories.TagFactory(term='term0'),
             factories.TagFactory(term='term1'))
-        factories.CommentFactory.create_batch(5, post=self.post)
+        factories.CommentFactory.create_batch(
+            5, post=self.post, status_id=models.Comment.STATUS_PUBLISHED)
 
         self.post_details_page.reload()
         post_element = self.post_details_page.get_post_details()
@@ -82,10 +91,23 @@ class PostDetailsPageTest(FunctionalTest):
         self.assertHTMLEqual(post_element.get('content'), self.post.content)
 
     def test_send_new_comment(self):
-        comment = factories.CommentFactory()
+        url_prev = self.post_details_page.current_driver_url
         self.post_details_page.send_comment_form(
-            comment.author,
-            comment.email,
-            comment.content)
+            author='author',
+            email='author@example.com',
+            content='Content ...')
 
-        self.assertTrue(self.post_details_page.is_comment_displayed(comment.content))
+        self.assertEqual(self.post.comments.count(), 1)
+        self.assertEqual(url_prev, self.post_details_page.current_driver_url)
+
+    def test_only_public_comments_are_displayed(self):
+        comment = factories.CommentFactory(
+            post=self.post, status_id=models.Comment.STATUS_PENDING)
+
+        self.post_details_page.reload()
+
+        with self.assertRaises(NoSuchElementException):
+            self.post_details_page.get_comment_details_by_pk(comment.pk)
+
+    def test_new_comments_default_status_is_pending(self):
+        self.fail('test_new_comments_default_status_is_pending FAULT')

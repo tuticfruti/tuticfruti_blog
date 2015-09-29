@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import datetime
 
+from selenium.common.exceptions import NoSuchElementException
+
 from django.core.urlresolvers import reverse
 from django.utils import timezone
 
@@ -8,8 +10,10 @@ from .pom import pages
 from .base_page import FunctionalTest
 
 from tuticfruti_blog.core import settings
+from tuticfruti_blog.core import data_fixtures
 from tuticfruti_blog.users.factories import UserFactory
 from tuticfruti_blog.posts import factories
+from tuticfruti_blog.posts import models
 
 
 class HomePageTest(FunctionalTest):
@@ -26,7 +30,7 @@ class HomePageTest(FunctionalTest):
         self.assertEqual(self.home_page.url, self.home_page.current_driver_url)
 
     def test_read_more_link(self):
-        post = factories.PostFactory(author=self.user, status_id=settings.POST_PUBLIC_STATUS)
+        post = factories.PostFactory(author=self.user, status_id=models.Post.STATUS_PUBLISHED)
 
         self.home_page.reload()
         self.home_page.click_on_read_me_link(post.pk)
@@ -62,17 +66,17 @@ class HomePageTest(FunctionalTest):
     def test_filter_by_category_id(self):
         factories.PostFactory(
             title='Post title {}'.format(settings.PYTHON_CATEGORY),
-            status_id=settings.POST_PUBLIC_STATUS,
+            status_id=models.Post.STATUS_PUBLISHED,
             category_id=settings.PYTHON_CATEGORY,
             author=self.user)
         factories.PostFactory(
             title='Post title {}'.format(settings.DJANGO_CATEGORY),
-            status_id=settings.POST_PUBLIC_STATUS,
+            status_id=models.Post.STATUS_PUBLISHED,
             category_id=settings.DJANGO_CATEGORY,
             author=self.user)
         factories.PostFactory(
             title='Post title {}'.format(settings.MISCELLANEOUS_CATEGORY),
-            status_id=settings.POST_PUBLIC_STATUS,
+            status_id=models.Post.STATUS_PUBLISHED,
             category_id=settings.MISCELLANEOUS_CATEGORY,
             author=self.user)
 
@@ -97,27 +101,27 @@ class HomePageTest(FunctionalTest):
 
     def test_orphans_posts(self):
         factories.PostFactory.create_batch(
-            settings.PAGINATE_BY + 1,
-            status_id=settings.POST_PUBLIC_STATUS,
+            models.Post.PAGINATE_BY + 1,
+            status_id=models.Post.STATUS_PUBLISHED,
             author=self.user)
 
         self.home_page.reload()
 
-        self.assertEqual(self.home_page.count_posts(), settings.PAGINATE_BY + 1)
+        self.assertEqual(self.home_page.count_posts(), models.Post.PAGINATE_BY + 1)
 
     def test_number_of_posts_limit(self):
         factories.PostFactory.create_batch(
-            settings.PAGINATE_BY + 2,
-            status_id=settings.POST_PUBLIC_STATUS,
+            models.Post.PAGINATE_BY + 2,
+            status_id=models.Post.STATUS_PUBLISHED,
             author=self.user)
 
         self.home_page.reload()
 
-        self.assertEqual(self.home_page.count_posts(), settings.PAGINATE_BY)
+        self.assertEqual(self.home_page.count_posts(), models.Post.PAGINATE_BY)
 
     def test_posts_order(self):
-        post = factories.PostFactory(status_id=settings.POST_PUBLIC_STATUS, author=self.user)
-        another_post = factories.PostFactory(status_id=settings.POST_PUBLIC_STATUS, author=self.user)
+        post = factories.PostFactory(status_id=models.Post.STATUS_PUBLISHED, author=self.user)
+        another_post = factories.PostFactory(status_id=models.Post.STATUS_PUBLISHED, author=self.user)
 
         # Post created in January month
         post.created = datetime.datetime(2015, 1, 1, tzinfo=timezone.get_current_timezone())
@@ -133,8 +137,8 @@ class HomePageTest(FunctionalTest):
 
     def test_prev_next_buttons(self):
         factories.PostFactory.create_batch(
-            3*settings.PAGINATE_BY,
-            status_id=settings.POST_PUBLIC_STATUS,
+            3*models.Post.PAGINATE_BY,
+            status_id=models.Post.STATUS_PUBLISHED,
             author=self.user)
 
         self.home_page.reload()
@@ -159,19 +163,19 @@ class HomePageTest(FunctionalTest):
         factories.PostFactory(
             author=self.user,
             title='Post title {}'.format(settings.PYTHON_CATEGORY),
-            status_id=settings.POST_PUBLIC_STATUS,
+            status_id=models.Post.STATUS_PUBLISHED,
             category_id=settings.PYTHON_CATEGORY,
             tags=[factories.TagFactory.build(term=settings.PYTHON_CATEGORY)])
         factories.PostFactory(
             author=self.user,
             title='Post title {}'.format(settings.DJANGO_CATEGORY),
-            status_id=settings.POST_PUBLIC_STATUS,
+            status_id=models.Post.STATUS_PUBLISHED,
             category_id=settings.DJANGO_CATEGORY,
             tags=[factories.TagFactory.build(term=settings.DJANGO_CATEGORY)])
         factories.PostFactory(
             author=self.user,
             title='Post title {}'.format(settings.MISCELLANEOUS_CATEGORY),
-            status_id=settings.POST_PUBLIC_STATUS,
+            status_id=models.Post.STATUS_PUBLISHED,
             category_id=settings.MISCELLANEOUS_CATEGORY,
             tags=[factories.TagFactory.build(term=settings.MISCELLANEOUS_CATEGORY)])
 
@@ -195,15 +199,25 @@ class HomePageTest(FunctionalTest):
         self.home_page.search_posts(terms, category_id=settings.MISCELLANEOUS_CATEGORY)
         self.assertEqual(self.home_page.count_posts(), 1)
 
+    def test_only_published_comments_are_counted(self):
+        post = factories.PostFactory(author=self.user, status_id=models.Post.STATUS_PUBLISHED)
+        factories.CommentFactory(post=post, status_id=models.Comment.STATUS_PENDING)
+        factories.CommentFactory(post=post, status_id=models.Comment.STATUS_PUBLISHED)
+        self.home_page.reload()
+        num_comments_element = self.home_page.get_post_details_by_pk(post.pk)
+
+        self.assertEqual(num_comments_element.get('num_comments'), str(1))
+
     def test_post_details(self):
         post = factories.PostFactory(
             author=self.user,
-            status_id=settings.POST_PUBLIC_STATUS,
-            content=settings.FUZZY_TEXTS[5])
+            status_id=models.Post.STATUS_PUBLISHED,
+            content=data_fixtures.FUZZY_TEXTS[5])
         post.tags.add(
             factories.TagFactory(term='term0'),
             factories.TagFactory(term='term1'))
-        factories.CommentFactory.create_batch(5, post=post)
+        factories.CommentFactory.create_batch(
+            5, post=post, status_id=models.Comment.STATUS_PUBLISHED)
 
         self.home_page.reload()
         post_element = self.home_page.get_post_details_by_pk(post.pk)
@@ -215,16 +229,16 @@ class HomePageTest(FunctionalTest):
         self.assertEqual(post_element.get('tags'), 'term0 term1')
         self.assertHTMLEqual(
             post_element.get('content'),
-            '{}{}'.format(post.content[:settings.POST_TEXT_CONTENT_LIMIT-3], '...'))
+            '{}{}'.format(post.content[:models.Post.TEXT_CONTENT_LIMIT-3], '...'))
 
     def test_post_content_must_be_truncated(self):
-        post = factories.PostFactory(author=self.user, status_id=settings.POST_PUBLIC_STATUS)
+        post = factories.PostFactory(author=self.user, status_id=models.Post.STATUS_PUBLISHED)
         self.home_page.reload()
         post_element = self.home_page.get_post_details_by_pk(post.pk)
-        self.assertLessEqual(len(post_element.get('content')), settings.POST_TEXT_CONTENT_LIMIT)
+        self.assertLessEqual(len(post_element.get('content')), models.Post.TEXT_CONTENT_LIMIT)
 
     def test_comments_link(self):
-        post = factories.PostFactory(author=self.user, status_id=settings.POST_PUBLIC_STATUS)
+        post = factories.PostFactory(author=self.user, status_id=models.Post.STATUS_PUBLISHED)
 
         self.home_page.reload()
         self.home_page.click_on_num_comments_link(post.pk)
@@ -235,3 +249,11 @@ class HomePageTest(FunctionalTest):
                 reverse('posts:detail', kwargs=dict(slug=post.slug)),
                 '#comments_id'),
             self.home_page.current_driver_url)
+
+    def test_only_public_posts_are_displayed(self):
+        post = factories.PostFactory(author=self.user, status_id=models.Post.STATUS_DRAFT)
+
+        self.home_page.reload()
+
+        with self.assertRaises(NoSuchElementException):
+            self.home_page.get_post_details_by_pk(post.pk)

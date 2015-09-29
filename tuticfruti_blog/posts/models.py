@@ -15,13 +15,27 @@ class Tag(models.Model):
 
 
 class Post(models.Model):
-    author = models.ForeignKey(User)
+    TEXT_CONTENT_LIMIT = 255
+
+    PAGINATE_BY = 10
+    PAGINATE_ORPHANS = 1
+    ORDERING = '-created'
+
+    STATUS_DRAFT = 'draft'
+    STATUS_PUBLISHED = 'published'
+
+    STATUS_CHOICES = (
+        (STATUS_DRAFT, 'Draft'),
+        (STATUS_PUBLISHED, 'Published'),
+    )
+
+    author = models.ForeignKey(User, related_name='posts')
     title = models.CharField(max_length=255, unique=True)
     slug = models.CharField(max_length=255, unique=True)
     content = models.TextField(blank=True)
     status_id = models.CharField(
-        choices=settings.POST_STATUS_CHOICES,
-        default=settings.POST_DRAFT_STATUS,
+        choices=STATUS_CHOICES,
+        default=STATUS_DRAFT,
         max_length=10,
         db_index=True)
     category_id = models.CharField(
@@ -29,7 +43,7 @@ class Post(models.Model):
         default=settings.PYTHON_CATEGORY,
         max_length=20,
         db_index=True)
-    tags = models.ManyToManyField(Tag)
+    tags = models.ManyToManyField(Tag, related_name='posts')
     created = models.DateTimeField(auto_now_add=True, blank=True, db_index=True)
     modified = models.DateTimeField(auto_now=True, blank=True, db_index=True)
 
@@ -45,10 +59,18 @@ class Post(models.Model):
 
 
 class Comment(models.Model):
-    post = models.ForeignKey(Post)
+    STATUS_PENDING = 'pending'
+    STATUS_PUBLISHED = 'published'
+
+    STATUS_CHOICES = (
+        (STATUS_PENDING, 'Pending'),
+        (STATUS_PUBLISHED, 'Published'),
+    )
+
+    post = models.ForeignKey(Post, related_name='comments')
     status_id = models.CharField(
-        choices=settings.COMMENT_STATUS_CHOICES,
-        default=settings.COMMENT_PENDING_STATUS,
+        choices=STATUS_CHOICES,
+        default=STATUS_PENDING,
         max_length=10,
         db_index=True)
     author = models.CharField(max_length=100, db_index=True)

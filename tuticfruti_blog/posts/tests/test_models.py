@@ -9,6 +9,7 @@ from django.utils import timezone
 
 from tuticfruti_blog.users.factories import UserFactory
 from tuticfruti_blog.core import settings
+from tuticfruti_blog.core import data_fixtures
 from .. import models
 from .. import factories
 
@@ -95,7 +96,7 @@ class PostModelTest(test.TransactionTestCase):
             models.Post.objects.create(author=self.user, title='Post title', category_id='')
 
     def test_status_default_value(self):
-        self.assertTrue(self.post.status_id, settings.POST_PUBLIC_STATUS)
+        self.assertTrue(self.post.status_id, models.Post.STATUS_PUBLISHED)
 
     def test_category_default_value(self):
         self.assertTrue(self.post.category_id, settings.PYTHON_CATEGORY)
@@ -151,39 +152,39 @@ class CommentModelTest(test.TestCase):
             post=self.post,
             author='user0',
             email='user0@example.com',
-            content=settings.FUZZY_TEXTS[0])
+            content=data_fixtures.FUZZY_TEXTS[0])
         self.another_comment = models.Comment.objects.create(
             post=self.post,
             author='user1',
             email='user1@example.com',
-            content=settings.FUZZY_TEXTS[1])
+            content=data_fixtures.FUZZY_TEXTS[1])
 
     def test_informal_string_representation(self):
-        self.assertEqual(str(self.comment), settings.FUZZY_TEXTS[0])
+        self.assertEqual(str(self.comment), data_fixtures.FUZZY_TEXTS[0])
 
     def test_post_registered_in_admin_backend(self):
         self.assertTrue(admin.site.is_registered(models.Comment))
 
     def test_saving_and_retrieving_items(self):
         saved_items = [
-            models.Comment.objects.get(content=settings.FUZZY_TEXTS[0]),
-            models.Comment.objects.get(content=settings.FUZZY_TEXTS[1])]
+            models.Comment.objects.get(content=data_fixtures.FUZZY_TEXTS[0]),
+            models.Comment.objects.get(content=data_fixtures.FUZZY_TEXTS[1])]
         self.assertEqual(saved_items[0], self.comment)
         self.assertEqual(saved_items[1], self.another_comment)
 
     def test_adding_comments_to_post(self):
         post = factories.PostFactory(title='Adding comments to post')
-        post.comment_set.add(self.comment)
-        post.comment_set.add(self.another_comment)
+        post.comments.add(self.comment)
+        post.comments.add(self.another_comment)
 
-        self.assertTrue(post.comment_set.count(), 2)
+        self.assertTrue(post.comments.count(), 2)
 
     def test_post_must_be_not_null(self):
         with self.assertRaises(IntegrityError):
             models.Comment.objects.create(
                 author='user0',
                 email='user0@example.com',
-                content=settings.FUZZY_TEXTS[0])
+                content=data_fixtures.FUZZY_TEXTS[0])
 
     def test_status_must_be_not_null(self):
         with self.assertRaises(IntegrityError):
@@ -191,19 +192,19 @@ class CommentModelTest(test.TestCase):
                 status_id=None,
                 author='user0',
                 email='user0@example.com',
-                content=settings.FUZZY_TEXTS[0])
+                content=data_fixtures.FUZZY_TEXTS[0])
 
     def test_name_must_be_not_null(self):
         with self.assertRaises(IntegrityError):
             models.Comment.objects.create(
                 email='user0@example.com',
-                content=settings.FUZZY_TEXTS[0])
+                content=data_fixtures.FUZZY_TEXTS[0])
 
     def test_email_must_be_not_null(self):
         with self.assertRaises(IntegrityError):
             models.Comment.objects.create(
                 author='user0',
-                content=settings.FUZZY_TEXTS[0])
+                content=data_fixtures.FUZZY_TEXTS[0])
 
     def test_content_must_be_not_null(self):
         with self.assertRaises(IntegrityError):
@@ -212,7 +213,7 @@ class CommentModelTest(test.TestCase):
                 email='user0@example.com')
 
     def test_status_default_value(self):
-        self.assertEqual(self.comment.status_id, settings.COMMENT_PENDING_STATUS)
+        self.assertEqual(self.comment.status_id, models.Comment.STATUS_PENDING)
 
     @unittest.skipIf(
         django_settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3',
@@ -223,7 +224,7 @@ class CommentModelTest(test.TestCase):
                 status_id='',
                 author='user0',
                 email='user0@example.com',
-                content=settings.FUZZY_TEXTS[0])
+                content=data_fixtures.FUZZY_TEXTS[0])
 
     @unittest.skipIf(
         django_settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3',
@@ -233,7 +234,7 @@ class CommentModelTest(test.TestCase):
             models.Comment.objects.create(
                 author='',
                 email='user0@example.com',
-                content=settings.FUZZY_TEXTS[0])
+                content=data_fixtures.FUZZY_TEXTS[0])
 
     @unittest.skipIf(
         django_settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3',
@@ -243,7 +244,7 @@ class CommentModelTest(test.TestCase):
             models.Comment.objects.create(
                 author='user0',
                 email='',
-                content=settings.FUZZY_TEXTS[0])
+                content=data_fixtures.FUZZY_TEXTS[0])
 
     @unittest.skipIf(
         django_settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3',

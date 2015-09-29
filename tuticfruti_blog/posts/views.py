@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.views import generic as generic_views
-from django.views.generic import detail as detail_mixins
 from django.views.generic import edit as edit_mixins
-
-from django.db.models import Count
+from django.db.models import Sum, Case, When, IntegerField
 from django.core.urlresolvers import reverse
 
 from tuticfruti_blog.core import settings
@@ -15,18 +13,24 @@ class PostListView(generic_views.ListView):
     model = models.Post
     context_object_name = 'posts'
     template_name = 'posts/list.html'
-    paginate_by = settings.PAGINATE_BY
-    paginate_orphans = settings.PAGINATE_ORPHANS
+    paginate_by = models.Post.PAGINATE_BY
+    paginate_orphans = models.Post.PAGINATE_ORPHANS
 
     def get_queryset(self):
-        return models.Post.objects \
-            .annotate(num_comments=Count('comment')) \
-            .filter(status_id=settings.POST_PUBLIC_STATUS) \
-            .order_by(settings.ORDERING)
+        return_value = models.Post.objects \
+            .annotate(comments__count=Sum(
+                Case(
+                    When(comments__status_id=models.Comment.STATUS_PUBLISHED, then=1),
+                    default=0,
+                    output_field=IntegerField()))) \
+            .filter(status_id=models.Post.STATUS_PUBLISHED) \
+            .order_by(models.Post.ORDERING)
+
+        return return_value
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['post_text_content_limit'] = settings.POST_TEXT_CONTENT_LIMIT
+        context['post_text_content_limit'] = models.Post.TEXT_CONTENT_LIMIT
         return context
 
 
@@ -69,7 +73,9 @@ class PostDetailView(edit_mixins.FormMixin, generic_views.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['form'] = self.get_form()
-        context['comments'] = self.get_object().comment_set.all().order_by(settings.ORDERING)
+        context['comments'] = self.get_object() \
+            .comments.filter(status_id=models.Comment.STATUS_PUBLISHED) \
+            .order_by(models.Post.ORDERING)
         return context
 
     def post(self, request, *args, **kwargs):
