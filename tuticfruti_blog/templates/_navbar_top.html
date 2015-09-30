@@ -3,16 +3,12 @@
 <nav id="navbar-top" class="navbar navbar-light navbar-fixed-top bg-faded row"> <!-- nav -->
   <div class="col-xs-12 col-sm-7">
     <a class="navbar-brand" href="{% url 'home' %}" title="Tuticfruti blog">Tuticfruti</a>
-    <ul class="nav navbar-nav">
-      <li class="nav-item">
-        <a href="{% url "posts:list_by_category" 'python' %}" class="nav-link {% if current_category_id == 'python' %} active{% endif %}">Python</a>
-      </li>
-      <li class="nav-item">
-        <a href="{% url "posts:list_by_category" 'django' %}" class="nav-link {% if current_category_id == 'django' %} active{% endif %}">Django</a>
-      </li>
-      <li class="nav-item">
-        <a href="{% url "posts:list_by_category" 'miscellaneous' %}" class="nav-link {% if current_category_id == 'miscellaneous' %} active{% endif %}">Miscellaneous</a>
-      </li>
+    <ul id="categories_id" class="nav navbar-nav">
+      {% for category in categories %}
+        <li class="nav-item">
+          <a id="category{{ category.pk }}_id" class="category" href="{% url "posts:list_by_category" category.slug %}" class="nav-link {% if category == current_category_id %} active{% endif %}">{{ category.name }}</a>
+        </li>
+      {% endfor %}
     </ul>
   </div>
   <div class="col-xs-12 col-sm-5">

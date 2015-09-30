@@ -45,3 +45,20 @@ class CommentFactory(factory.DjangoModelFactory):
     status_id = factory.fuzzy.FuzzyChoice(
         [status_id for status_id, status_name in models.Comment.STATUS_CHOICES])
     content = factory.fuzzy.FuzzyChoice(data_fixtures.FUZZY_TEXTS)
+
+
+class CategoryFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = models.Category
+
+    name = factory.Sequence(lambda n: 'category{}'.format(n))
+    order = factory.Sequence(lambda n: n)
+
+    @factory.post_generation
+    def tags(self, create, extracted, **kwargs):
+        if not create:
+            return
+
+        if extracted:
+            for tag in extracted:
+                self.tags.create(term=tag.term)

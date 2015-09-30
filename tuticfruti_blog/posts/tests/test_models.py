@@ -14,7 +14,7 @@ from .. import models
 from .. import factories
 
 
-class PostModelTest(test.TransactionTestCase):
+class PostModelTest(test.TestCase):
     def setUp(self):
         self.user = UserFactory()
         self.post = factories.PostFactory(author=self.user, title='Post title 0')
@@ -74,27 +74,6 @@ class PostModelTest(test.TransactionTestCase):
     def test_modified_datetime_must_be_equal_to_today(self):
         self.assertEqual(self.post.modified.date(), timezone.now().date())
 
-    @unittest.skipIf(
-        django_settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3',
-        'Sqlite database is present')
-    def test_title_must_be_not_blank(self):
-        with self.assertRaises(IntegrityError):
-            models.Post.objects.create(author=self.user, title='')
-
-    @unittest.skipIf(
-        django_settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3',
-        'Sqlite database is present')
-    def test_status_must_be_not_blank(self):
-        with self.assertRaises(IntegrityError):
-            models.Post.objects.create(author=self.user, title='Post title', status_id='')
-
-    @unittest.skipIf(
-        django_settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3',
-        'Sqlite database is present')
-    def test_category_must_be_not_blank(self):
-        with self.assertRaises(IntegrityError):
-            models.Post.objects.create(author=self.user, title='Post title', category_id='')
-
     def test_status_default_value(self):
         self.assertTrue(self.post.status_id, models.Post.STATUS_PUBLISHED)
 
@@ -129,13 +108,6 @@ class TagModelTest(test.TransactionTestCase):
     def test_tag_must_be_not_null(self):
         with self.assertRaises(IntegrityError):
             models.Tag.objects.create(term=None)
-
-    @unittest.skipIf(
-        django_settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3',
-        'Sqlite database is present')
-    def test_tag_must_be_not_blank(self):
-        with self.assertRaises(IntegrityError):
-            models.Tag.objects.create(term='')
 
     def test_adding_tags_to_post(self):
         self.post.tags.add(self.tag)
@@ -215,43 +187,48 @@ class CommentModelTest(test.TestCase):
     def test_status_default_value(self):
         self.assertEqual(self.comment.status_id, models.Comment.STATUS_PENDING)
 
-    @unittest.skipIf(
-        django_settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3',
-        'Sqlite database is present')
-    def test_status_must_be_not_blank(self):
-        with self.assertRaises(IntegrityError):
-            models.Comment.objects.create(
-                status_id='',
-                author='user0',
-                email='user0@example.com',
-                content=data_fixtures.FUZZY_TEXTS[0])
 
-    @unittest.skipIf(
-        django_settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3',
-        'Sqlite database is present')
-    def test_name_must_be_not_blank(self):
-        with self.assertRaises(IntegrityError):
-            models.Comment.objects.create(
-                author='',
-                email='user0@example.com',
-                content=data_fixtures.FUZZY_TEXTS[0])
+class CategoryModelTest(test.TestCase):
+    def setUp(self):
+        self.user = UserFactory()
 
-    @unittest.skipIf(
-        django_settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3',
-        'Sqlite database is present')
-    def test_email_must_be_not_blank(self):
-        with self.assertRaises(IntegrityError):
-            models.Comment.objects.create(
-                author='user0',
-                email='',
-                content=data_fixtures.FUZZY_TEXTS[0])
+    def test_informal_string_representation(self):
+        category = models.Category.objects.create(name='Python category')
+        self.assertEqual(str(category), 'Python category')
 
-    @unittest.skipIf(
-        django_settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3',
-        'Sqlite database is present')
-    def test_comment_must_be_not_blank(self):
+    def test_post_registered_in_admin_backend(self):
+        self.assertTrue(admin.site.is_registered(models.Category))
+
+    def test_saving_and_retrieving_items(self):
+        tag = models.Tag.objects.create(term='python')
+        another_tag = models.Tag.objects.create(term='django')
+        category = models.Category.objects.create(name='Python category')
+        category.tags.add(tag)
+        another_category = models.Category.objects.create(name='Django category')
+        another_category.tags.add(another_tag)
+        saved_items = [
+            models.Category.objects.get(name='Python category', order=1),
+            models.Category.objects.get(name='Django category', order=2)]
+
+        self.assertEqual(saved_items[0], category)
+        self.assertEqual(saved_items[0].tags.first(), tag)
+        self.assertEqual(saved_items[1], another_category)
+        self.assertEqual(saved_items[1].tags.first(), another_tag)
+
+
+    def test_name_must_be_unique(self):
+        category = models.Category.objects.create(name='Python category')
         with self.assertRaises(IntegrityError):
-            models.Comment.objects.create(
-                author='user0',
-                email='user0@example.com',
-                content='')
+            another_category = models.Category.objects.create(name='Python category')
+
+    def test_name_must_be_not_null(self):
+        with self.assertRaises(IntegrityError):
+            category = models.Category.objects.create(name=None)
+
+    def test_order_must_be_not_null(self):
+        with self.assertRaises(IntegrityError):
+            category = models.Category.objects.create(order=None)
+
+    def test_is_active_default_value(self):
+        category = models.Category.objects.create(name='Python category')
+        self.assertTrue(category.is_active)

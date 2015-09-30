@@ -21,3 +21,4 @@ POST_DETAILS = (By.XPATH, '//div[contains(@class, "post")]')
 # Element colletion locators
 POSTS = (By.XPATH, '//div[contains(@class, "post")]')
 COMMENTS = (By.XPATH, '//div[contains(@class, "comment")]')
+CATEGORIES = (By.XPATH, '//ul[@id="categories_id"//a[contains(@class, "category")]')

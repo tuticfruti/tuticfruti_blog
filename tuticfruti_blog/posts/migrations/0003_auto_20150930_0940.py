@@ -7,13 +7,13 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('posts', '0002_auto_20150929_1004'),
+        ('posts', '0002_auto_20150930_0939'),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='comment',
-            name='post',
-            field=models.ForeignKey(to='posts.Post', related_name='comments'),
+            model_name='category',
+            name='name',
+            field=models.CharField(max_length=100, unique=True),
         ),
     ]

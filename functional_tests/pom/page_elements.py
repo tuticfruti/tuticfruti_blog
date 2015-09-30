@@ -73,3 +73,7 @@ class CommentCollection(WebElementCollection):
 
 class PostDetails(WebElement):
     _locator = locators.POST_DETAILS
+
+
+class CategoryCollection(WebElementCollection):
+    _locator = locators.CATEGORIES

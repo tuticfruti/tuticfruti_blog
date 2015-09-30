@@ -81,3 +81,13 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.content
+
+
+class Category(models.Model):
+    name = models.CharField(max_length=100, unique=True, blank=False)
+    order = models.IntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    tags = models.ManyToManyField(Tag, related_name='categories')
+
+    def __str__(self):
+        return self.name

@@ -2,7 +2,6 @@
 import re
 
 from selenium.common.exceptions import TimeoutException
-
 from django.core.urlresolvers import reverse
 
 from .base_page import BasePage
@@ -38,14 +37,6 @@ class HomePage(BasePage):
 
     def goto_home_page(self):
         self._home_page_link.click()
-
-    def select_category(self, category_id):
-        category_link = getattr(self, '_{}_category_link'.format(category_id))
-        category_link.click()
-
-    def is_category_enabled(self, category_id):
-        category_link = getattr(self, '_{}_category_link'.format(category_id))
-        return 'active' in category_link.get_attribute('class')
 
     def count_posts(self):
         return len(self._posts)
