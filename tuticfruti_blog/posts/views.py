@@ -16,23 +16,18 @@ class PostListView(generic_views.ListView):
     paginate_orphans = models.Post.PAGINATE_ORPHANS
 
     def get_queryset(self):
-        comments = models.Comment.objects.filter(status_id=models.Comment.STATUS_PUBLISHED)
-        categories = models.Category.objects.all().order_by('order')
-        tags = models.Tag.objects.all().order_by('term')
-
         return models.Post.objects \
-            .filter(status_id=models.Post.STATUS_PUBLISHED) \
+            .all_published() \
             .prefetch_related(
-                Prefetch('categories', queryset=categories),
-                Prefetch('tags', queryset=tags),
-                Prefetch('comments', queryset=comments)) \
-            .select_related('author') \
-            .order_by(models.Post.ORDERING)
+                Prefetch('categories', queryset=models.Category.objects.all()),
+                Prefetch('tags', queryset=models.Tag.objects.all()),
+                Prefetch('comments', queryset=models.Comment.objects.all_published())) \
+            .select_related('author')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['post_text_content_limit'] = models.Post.TEXT_CONTENT_LIMIT
-        context['categories'] = models.Category.objects.filter(is_active=True).order_by('order')
+        context['categories'] = models.Category.objects.all_enabled()
         return context
 
 
@@ -70,18 +65,12 @@ class PostDetailView(edit_mixins.FormMixin, generic_views.DetailView):
     context_object_name = 'post'
 
     def get_queryset(self):
-        categories = models.Category.objects.all().order_by('order')
-        tags = models.Tag.objects.all().order_by('term')
-        comments = models.Comment.objects \
-            .filter(status_id=models.Comment.STATUS_PUBLISHED) \
-            .order_by(models.Comment.ORDERING)
-
         return models.Post.objects \
             .filter(slug=self.kwargs.get('slug')) \
             .prefetch_related(
-                Prefetch('comments', queryset=comments),
-                Prefetch('tags', queryset=tags),
-                Prefetch('categories', queryset=categories)) \
+                Prefetch('comments', queryset=models.Comment.objects.all_published()),
+                Prefetch('tags', queryset=models.Tag.objects.all()),
+                Prefetch('categories', queryset=models.Category.objects.all())) \
             .select_related('author')
 
     def get_success_url(self):
@@ -90,6 +79,7 @@ class PostDetailView(edit_mixins.FormMixin, generic_views.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['form'] = self.get_form()
+        context['categories'] = models.Category.objects.all_enabled()
         return context
 
     def post(self, request, *args, **kwargs):

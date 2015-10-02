@@ -3,6 +3,7 @@ from django.db import models
 from django.core.urlresolvers import reverse
 from django.template.defaultfilters import slugify
 
+from tuticfruti_blog.posts import managers
 from tuticfruti_blog.users.models import User
 
 
@@ -17,12 +18,15 @@ class Tag(models.Model):
     def __str__(self):
         return self.term
 
+    class Meta:
+        ordering = ['term']
+
 
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True, blank=False)
     slug = models.SlugField(max_length=25)
     order = models.IntegerField(default=0)
-    is_active = models.BooleanField(default=True)
+    is_enabled = models.BooleanField(default=True)
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
@@ -31,13 +35,17 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+    objects = managers.CategoryManager()
+
+    class Meta:
+        ordering = ['order']
+
 
 class Post(models.Model):
     TEXT_CONTENT_LIMIT = 255
 
     PAGINATE_BY = 10
     PAGINATE_ORPHANS = 1
-    ORDERING = '-created'
 
     STATUS_DRAFT = 'draft'
     STATUS_PUBLISHED = 'published'
@@ -71,9 +79,13 @@ class Post(models.Model):
     def __str__(self):
         return self.title
 
+    objects = managers.PostManager()
+
+    class Meta:
+        ordering = ['-created']
+
 
 class Comment(models.Model):
-    ORDERING = '-created'
     STATUS_PENDING = 'pending'
     STATUS_PUBLISHED = 'published'
 
@@ -96,3 +108,8 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.content
+
+    objects = managers.CommentManager()
+
+    class Meta:
+        ordering = ["-created"]
