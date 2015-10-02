@@ -1,12 +1,10 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <div id="posts_id" class="container">
-    {% for post in posts %}
-        {% include 'posts/_post_detail.html' %}
-    {% empty %}
-      <p class="h5 text-muted bg"><em>Results were not found.</em></p>
-    {% endfor %}
-    {% include "_pagination.html" %}
-  </div>
+  {% for post in posts %}
+    {% include 'posts/_post_detail.html' %}
+  {% empty %}
+    {% include '_results_were_not_found.html' %}
+  {% endfor %}
+  {% include "_pagination.html" %}
 {% endblock content %}

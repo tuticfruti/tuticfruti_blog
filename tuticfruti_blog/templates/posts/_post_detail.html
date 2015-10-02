@@ -60,7 +60,7 @@
       <div class="col-sm-2 col-sm-push-8">
         <span>
           <a class="comments__count label label-default label-pill" href="{% url 'posts:detail' post.slug %}#comments_id" title="Goto comments">
-            {{ post.comments.count }}
+            {{ post.comments|length }}
           </a>
         </span>
         <em class="small">comments</em>

@@ -1,9 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <div class="container">
-    {% include 'posts/_post_detail.html' %}
-    {% include "posts/_comment_form.html" %}
-    {% include "posts/_comment_list.html" %}
-  </div>
+  {% include 'posts/_post_detail.html' %}
+  {% include "posts/_comment_form.html" %}
+  {% include "posts/_comment_list.html" %}
 {% endblock content %}

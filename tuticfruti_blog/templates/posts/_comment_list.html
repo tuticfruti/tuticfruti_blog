@@ -4,7 +4,7 @@
       {% for comment in post.comments.all %}
         {% include 'posts/__comment_detail.html' %}
       {% empty %}
-        <p class="h5 text-muted"><em>Results were not found.</em></p>
+        {% include '_results_were_not_found.html' %}
       {% endfor %}
   </div>
 </div>
