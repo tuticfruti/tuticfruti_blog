@@ -1,10 +1,10 @@
 <div class="row">
   <div id="comments_id" class="col-sm-12">
     <h4 class="text-muted">Comments:</h4>
-      {% for comment in comments %}
+      {% for comment in post.comments.all %}
         {% include 'posts/__comment_detail.html' %}
       {% empty %}
-        <p>Results were not found.</p>
+        <p class="h5 text-muted"><em>Results were not found.</em></p>
       {% endfor %}
   </div>
 </div>

@@ -2,7 +2,14 @@
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 
+from functional_tests.pom import page_elements
+
+
 class BasePage:
+    _driver = None
+    url = None
+    url_path = None
+
     # Web elements
 
     # Web element collections
@@ -27,7 +34,7 @@ class BasePage:
         self._driver.quit()
 
     def reload(self):
-        self._driver.get(self.url)
+        self._driver.refresh()
 
     def __enter__(self):
         self.open()
@@ -35,19 +42,3 @@ class BasePage:
 
     def __exit__(self, type, value, traceback):
         self.close()
-
-    def select_category(self, pk):
-        category_element = self._driver.find_element_by_id('category{}_id'.format(str(pk)))
-        category_element.click()
-
-    def is_category_enabled(self, pk):
-        category_element = self._driver.find_element_by_id('category{}_id'.format(str(pk)))
-        return 'active' in category_element.get_attribute('class')
-
-    def is_category_displayed(self, pk):
-        try:
-            category_element = self._driver.find_element_by_id('category{}_id'.format(str(pk)))
-            if category_element:
-                return True
-        except NoSuchElementException:
-            return

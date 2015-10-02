@@ -4,14 +4,32 @@ from django.core.urlresolvers import reverse
 from django.template.defaultfilters import slugify
 
 from tuticfruti_blog.users.models import User
-from tuticfruti_blog.core import settings
 
 
 class Tag(models.Model):
     term = models.CharField(max_length=255, unique=True)
 
+    def save(self, *args, **kwargs):
+        if self.term:
+            self.term = self.term.lower()
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.term
+
+
+class Category(models.Model):
+    name = models.CharField(max_length=100, unique=True, blank=False)
+    slug = models.SlugField(max_length=25)
+    order = models.IntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
 
 
 class Post(models.Model):
@@ -29,19 +47,15 @@ class Post(models.Model):
         (STATUS_PUBLISHED, 'Published'),
     )
 
+    categories = models.ManyToManyField(Category, related_name='posts')
     author = models.ForeignKey(User, related_name='posts')
     title = models.CharField(max_length=255, unique=True)
-    slug = models.CharField(max_length=255, unique=True)
+    slug = models.SlugField(max_length=255)
     content = models.TextField(blank=True)
     status_id = models.CharField(
         choices=STATUS_CHOICES,
         default=STATUS_DRAFT,
         max_length=10,
-        db_index=True)
-    category_id = models.CharField(
-        choices=settings.CATEGORY_CHOICES,
-        default=settings.PYTHON_CATEGORY,
-        max_length=20,
         db_index=True)
     tags = models.ManyToManyField(Tag, related_name='posts')
     created = models.DateTimeField(auto_now_add=True, blank=True, db_index=True)
@@ -49,7 +63,7 @@ class Post(models.Model):
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.title)
-        super(Post, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     def get_absolute_url(self):
         return reverse('posts:detail', kwargs={'slug': self.slug})
@@ -59,6 +73,7 @@ class Post(models.Model):
 
 
 class Comment(models.Model):
+    ORDERING = '-created'
     STATUS_PENDING = 'pending'
     STATUS_PUBLISHED = 'published'
 
@@ -81,13 +96,3 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.content
-
-
-class Category(models.Model):
-    name = models.CharField(max_length=100, unique=True, blank=False)
-    order = models.IntegerField(default=0)
-    is_active = models.BooleanField(default=True)
-    tags = models.ManyToManyField(Tag, related_name='categories')
-
-    def __str__(self):
-        return self.name

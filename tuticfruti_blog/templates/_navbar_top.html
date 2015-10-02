@@ -6,13 +6,13 @@
     <ul id="categories_id" class="nav navbar-nav">
       {% for category in categories %}
         <li class="nav-item">
-          <a id="category{{ category.pk }}_id" class="category" href="{% url "posts:list_by_category" category.slug %}" class="nav-link {% if category == current_category_id %} active{% endif %}">{{ category.name }}</a>
+          <a id="category{{ category.pk }}_id" href="{% url 'posts:list_by_category' category.slug %}" class="category nav-link {% if category.slug == current_category %} active{% endif %}">{{ category.name }}</a>
         </li>
       {% endfor %}
     </ul>
   </div>
   <div class="col-xs-12 col-sm-5">
-    <form id="search_form_id" action="{% if current_category_id %}{% url 'posts:search_by_category' current_category_id %}{% else %}{% url 'posts:search' %}{% endif %}" method="get" class="form-inline navbar-form pull-right">
+    <form id="search_form_id" action="{% if current_category %}{% url 'posts:search_by_category' current_category %}{% else %}{% url 'posts:search' %}{% endif %}" method="get" class="form-inline navbar-form pull-right">
       <div class="input-group">
         <input name="search_terms" type="text" class="form-control" placeholder="Search ..." value="{% if search_terms %}{{ search_terms }}{% endif %}" aria-label="">
         <span class="input-group-btn">

@@ -14,13 +14,13 @@ urlpatterns = [
     url(r'^id/(?P<pk>[0-9]+)/$', views.PostDetailView.as_view(), name='detail_by_pk'),
 
     # ex: /posts/category/python/
-    url(r'^category/(?P<category_id>[a-z]+)/$', views.PostListByCategoryView.as_view(), name='list_by_category'),
+    url(r'^category/(?P<slug>[-\w]+)/$', views.PostListByCategoryView.as_view(), name='list_by_category'),
 
     # ex: /posts/search/
     url(r'^search/$', views.PostListSearchView.as_view(), name='search'),
     # ex: /posts/category/python/search/
     url(
-        r'^(?P<category_id>[a-z]+)/search/$',
+        r'^category/(?P<slug>[-\w]+)/search/$',
         views.PostListSearchView.as_view(),
         name='search_by_category'),
 ]

@@ -3,12 +3,11 @@ import unittest
 
 from django.db import IntegrityError
 from django import test
-from django.conf import settings as django_settings
+from django.conf import settings as settings
 from django.contrib import admin
 from django.utils import timezone
 
 from tuticfruti_blog.users.factories import UserFactory
-from tuticfruti_blog.core import settings
 from tuticfruti_blog.core import data_fixtures
 from .. import models
 from .. import factories
@@ -21,7 +20,7 @@ class PostModelTest(test.TestCase):
         self.another_post = factories.PostFactory(author=self.user, title='Post title 1')
 
     def test_app_belongs_to_local_apps(self):
-        self.assertIn('tuticfruti_blog.posts', django_settings.LOCAL_APPS)
+        self.assertIn('tuticfruti_blog.posts', settings.LOCAL_APPS)
 
     def test_informal_string_representation(self):
         self.assertEqual(str(self.post), 'Post title 0')
@@ -36,16 +35,26 @@ class PostModelTest(test.TestCase):
         self.assertEqual(self.post.slug, 'post-title-0')
 
     def test_saving_and_retrieving_items(self):
+        category = factories.CategoryFactory(name='Category')
+        tag = factories.TagFactory(term='term')
+        post = factories.PostFactory(author=self.user, title='Post')
+        post.categories.add(category)
+        post.tags.add(tag)
+        another_post = factories.PostFactory(author=self.user, title='Another post')
+        another_post.categories.add(category)
+        another_post.tags.add(tag)
         saved_items = [
-            models.Post.objects.get(title='Post title 0'),
-            models.Post.objects.get(title='Post title 1')]
+            models.Post.objects.get(title='Post'),
+            models.Post.objects.get(title='Another post')]
 
         self.assertEqual(saved_items[0].author, self.user)
-        self.assertEqual(saved_items[0].title, self.post.title)
-        self.assertEqual(saved_items[0].content, self.post.content)
+        self.assertEqual(saved_items[0].title, post.title)
+        self.assertEqual(saved_items[0].content, post.content)
+        self.assertEqual(saved_items[0].categories.get(name='Category'), category)
         self.assertEqual(saved_items[1].author, self.user)
-        self.assertEqual(saved_items[1].title, self.another_post.title)
-        self.assertEqual(saved_items[1].content, self.another_post.content)
+        self.assertEqual(saved_items[1].title, another_post.title)
+        self.assertEqual(saved_items[1].content, another_post.content)
+        self.assertEqual(saved_items[1].categories.get(name='Category'), category)
 
     def test_author_must_be_not_null(self):
         with self.assertRaises(IntegrityError):
@@ -77,11 +86,8 @@ class PostModelTest(test.TestCase):
     def test_status_default_value(self):
         self.assertTrue(self.post.status_id, models.Post.STATUS_PUBLISHED)
 
-    def test_category_default_value(self):
-        self.assertTrue(self.post.category_id, settings.PYTHON_CATEGORY)
 
-
-class TagModelTest(test.TransactionTestCase):
+class TagModelTest(test.TestCase):
     def setUp(self):
         self.user = UserFactory()
         self.post = factories.PostFactory(author=self.user, title='Post title 0')
@@ -115,6 +121,9 @@ class TagModelTest(test.TransactionTestCase):
 
         self.assertEqual(self.post.tags.count(), 2)
 
+    def test_term_tag_is_saved_in_lowercase(self):
+        tag = models.Tag.objects.create(term='TeRm')
+        self.assertEqual(tag.term, 'term')
 
 class CommentModelTest(test.TestCase):
     def setUp(self):
@@ -200,20 +209,14 @@ class CategoryModelTest(test.TestCase):
         self.assertTrue(admin.site.is_registered(models.Category))
 
     def test_saving_and_retrieving_items(self):
-        tag = models.Tag.objects.create(term='python')
-        another_tag = models.Tag.objects.create(term='django')
-        category = models.Category.objects.create(name='Python category')
-        category.tags.add(tag)
-        another_category = models.Category.objects.create(name='Django category')
-        another_category.tags.add(another_tag)
+        category = models.Category.objects.create(name='Category')
+        another_category = models.Category.objects.create(name='Another category')
         saved_items = [
-            models.Category.objects.get(name='Python category', order=1),
-            models.Category.objects.get(name='Django category', order=2)]
+            models.Category.objects.get(name='Category'),
+            models.Category.objects.get(name='Another category')]
 
         self.assertEqual(saved_items[0], category)
-        self.assertEqual(saved_items[0].tags.first(), tag)
         self.assertEqual(saved_items[1], another_category)
-        self.assertEqual(saved_items[1].tags.first(), another_tag)
 
 
     def test_name_must_be_unique(self):

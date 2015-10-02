@@ -20,7 +20,6 @@ urlpatterns = [
 
     # Your stuff: custom urls includes go here
     url(r'^posts/', include('tuticfruti_blog.posts.urls', namespace='posts')),
-    url(r'^comments/', include('tuticfruti_blog.comments.urls', namespace='comments')),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

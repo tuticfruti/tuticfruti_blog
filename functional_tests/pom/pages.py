@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
 
-from selenium.common.exceptions import TimeoutException
+from selenium.common import exceptions as selenium_exceptions
 from django.core.urlresolvers import reverse
 
 from .base_page import BasePage
@@ -14,9 +14,6 @@ class HomePage(BasePage):
 
     # Web elements
     _home_page_link = page_elements.HomePageLink()
-    _python_category_link = page_elements.PythonCategoryLink()
-    _django_category_link = page_elements.DjangoCategoryLink()
-    _miscellaneous_category_link = page_elements.MiscellaneousCategoryLink()
     _container = page_elements.Container()
     _prev_link = page_elements.PrevLink()
     _next_link = page_elements.NextLink()
@@ -41,9 +38,10 @@ class HomePage(BasePage):
     def count_posts(self):
         return len(self._posts)
 
-    def search_posts(self, terms, category_id=None):
-        if category_id:
-            getattr(self, '_{}_category_link'.format(category_id)).click()
+    def search_posts(self, terms, category_pk=None):
+        if category_pk:
+            self.select_category(category_pk)
+
         self._search_form_input = terms
         self._search_form_button.click()
 
@@ -53,13 +51,13 @@ class HomePage(BasePage):
     def is_prev_link_visible(self):
         try:
             return self._prev_link is not None
-        except TimeoutException:
+        except selenium_exceptions.TimeoutException:
             return
 
     def is_next_link_visible(self):
         try:
             return self._next_link is not None
-        except TimeoutException:
+        except selenium_exceptions.TimeoutException:
             return
 
     def goto_next_page(self):
@@ -83,6 +81,7 @@ class HomePage(BasePage):
 
     def _get_post_details(self, post_element):
         return dict(
+            categories=post_element.find_element_by_class_name('post_categories').text,
             author=post_element.find_element_by_class_name('post_author').text,
             title=post_element.find_element_by_class_name('post_title').text,
             created=post_element.find_element_by_class_name('post_created').text,
@@ -98,6 +97,26 @@ class HomePage(BasePage):
     def get_post_details_by_key(self, key):
         post_element = self._posts[key]
         return self._get_post_details(post_element)
+
+    def select_category(self, pk):
+        category_element = self._driver.find_element_by_id('category{}_id'.format(str(pk)))
+        category_element.click()
+
+    def is_category_enabled(self, pk):
+        category_element = self._driver.find_element_by_id('category{}_id'.format(str(pk)))
+        return 'active' in category_element.get_attribute('class')
+
+    def is_category_displayed(self, pk):
+        try:
+            category_element = self._driver.find_element_by_id('category{}_id'.format(str(pk)))
+            if category_element:
+                return True
+        except selenium_exceptions.NoSuchElementException:
+            return
+
+    def get_category_details_by_key(self, key):
+        return dict(
+            name=self._categories[key].text)
 
 
 class PostDetailsPage(BasePage):

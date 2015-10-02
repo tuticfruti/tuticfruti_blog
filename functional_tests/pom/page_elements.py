@@ -11,18 +11,6 @@ class CategoryLink(WebElement):
         return 'active' in self.get_attribute('class')
 
 
-class PythonCategoryLink(WebElement):
-    _locator = locators.PYTHON_CATEGORY_LINK
-
-
-class DjangoCategoryLink(WebElement):
-    _locator = locators.DJANGO_CATEGORY_LINK
-
-
-class MiscellaneousCategoryLink(WebElement):
-    _locator = locators.MISCELLANEOUS_CATEGORY_LINK
-
-
 class Container(WebElement):
     _locator = locators.CONTAINER
 
