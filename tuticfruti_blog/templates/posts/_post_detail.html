@@ -58,11 +58,13 @@
 
       <!-- Comments number -->
       <div class="col-sm-2 col-sm-push-8">
-        <span>
+        {% if post.comments.count %}
           <a class="comments__count label label-default label-pill" href="{% url 'posts:detail' post.slug %}#comments_id" title="Goto comments">
-            {{ post.comments|length }}
+            {{ post.comments.count }}
           </a>
-        </span>
+        {% else %}
+          <span class="comments__count label label-default label-pill">0</span>
+        {% endif %}
         <em class="small">comments</em>
       </div>
 

@@ -240,3 +240,11 @@ class TestHomePage(functional_test.FunctionalTest):
         for category in categories:
             self.page.select_category(category.pk)
             self.assertTrue(self.page.is_category_enabled(category.pk))
+
+    def test_disabled_link_to_comments_if_no_comments_found(self):
+        post = factories.PostFactory(author=self.user)
+        self.page.reload()
+        current_driver_url = self.page.current_driver_url
+        self.page.click_on_num_comments_link(post.pk)
+
+        self.assertEqual(current_driver_url, self.page.current_driver_url)
