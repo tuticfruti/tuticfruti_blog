@@ -16,13 +16,14 @@ class PostListView(generic_views.ListView):
     paginate_orphans = models.Post.PAGINATE_ORPHANS
 
     def get_queryset(self):
-        return models.Post.objects \
+        queryset = models.Post.objects \
             .all_published() \
             .prefetch_related(
                 Prefetch('categories', queryset=models.Category.objects.all()),
                 Prefetch('tags', queryset=models.Tag.objects.all()),
                 Prefetch('comments', queryset=models.Comment.objects.all_published())) \
             .select_related('author')
+        return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -59,19 +60,19 @@ class PostListSearchView(PostListByCategoryView):
 
 
 class PostDetailView(edit_mixins.FormMixin, generic_views.DetailView):
-    model = models.Post
     template_name = 'posts/detail.html'
     form_class = forms.CommentForm
     context_object_name = 'post'
 
     def get_queryset(self):
-        return models.Post.objects \
+        queryset = models.Post.objects \
             .filter(slug=self.kwargs.get('slug')) \
             .prefetch_related(
                 Prefetch('comments', queryset=models.Comment.objects.all_published()),
                 Prefetch('tags', queryset=models.Tag.objects.all()),
                 Prefetch('categories', queryset=models.Category.objects.all())) \
             .select_related('author')
+        return queryset
 
     def get_success_url(self):
         return reverse('posts:detail', kwargs=dict(slug=self.get_object().slug))

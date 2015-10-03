@@ -129,6 +129,8 @@ class PostDetailsPage(BasePage):
 
     # Web element collections
     _comments = page_elements.CommentCollection()
+    _tags = page_elements.PostTagCollection()
+    _categories = page_elements.PostCategoryCollection()
 
     def __init__(self, liver_server_url, slug):
         self.url_path = reverse('posts:detail', kwargs=dict(slug=slug))
@@ -175,3 +177,11 @@ class PostDetailsPage(BasePage):
 
     def is_empty_message_visible(self):
         return 'Results were not found.' in self._driver.find_element_by_id('comments_id').text
+
+    def click_on_tag_by_key(self, key):
+        tag_element = self._tags[key]
+        tag_element.click()
+
+    def click_on_category_by_key(self, key):
+        category_element = self._categories[key]
+        category_element.click()

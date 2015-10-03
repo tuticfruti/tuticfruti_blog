@@ -35,7 +35,9 @@ class TestHomePage(functional_test.FunctionalTest):
 
         self.assertEqual(
             self.page.current_driver_url,
-            '{}{}'.format(self.live_server_url, reverse('posts:detail', kwargs=dict(slug=post.slug))))
+            '{}{}'.format(
+                self.live_server_url,
+                reverse('posts:detail', kwargs=dict(slug=post.slug))))
 
     def test_empty_message(self):
         self.assertTrue(self.page.is_empty_message_visible())
@@ -71,7 +73,8 @@ class TestHomePage(functional_test.FunctionalTest):
         another_post.save()
         self.page.reload()
 
-        self.assertTrue('February' in self.page.get_post_details_by_key(0).get('created'))
+        self.assertTrue(
+            'February' in self.page.get_post_details_by_key(0).get('created'))
 
     def test_prev_next_pagination_buttons(self):
         factories.PostFactory.create_batch(
@@ -118,7 +121,8 @@ class TestHomePage(functional_test.FunctionalTest):
         self.page.reload()
 
         # User searchs "python" and "django" terms in All posts
-        terms = '{} {}'.format(self.python_category.name, self.django_category.name)
+        terms = '{} {}'.format(
+            self.python_category.name, self.django_category.name)
         self.page.search_posts(terms)
         self.assertEqual(self.page.count_posts(), 2)
 
@@ -207,20 +211,23 @@ class TestHomePage(functional_test.FunctionalTest):
             self.assertTrue(self.page.is_category_displayed(category.pk))
 
     def test_only_active_categories_are_displayed(self):
-        category = factories.CategoryFactory(name='Disabled category', is_active=False)
+        category = factories.CategoryFactory(
+            name='Disabled category', is_active=False)
         self.page.reload()
 
         self.assertFalse(self.page.is_category_displayed(category.pk))
 
     def test_categories_asc_order(self):
-        category = factories.CategoryFactory(name='First category', is_active=True, order=-1)
+        category = factories.CategoryFactory(
+            name='First category', is_active=True, order=-1)
         self.page.reload()
         self.assertEqual(self.page.get_category_details_by_key(0).get('name'), category.name)
 
     def test_filter_by_category(self):
         categories = models.Category.objects.filter(is_active=True)
         for category in categories:
-            post = factories.PostFactory(status_id=models.Post.STATUS_PUBLISHED)
+            post = factories.PostFactory(
+                status_id=models.Post.STATUS_PUBLISHED)
             post.categories.add(category)
         self.page.reload()
 

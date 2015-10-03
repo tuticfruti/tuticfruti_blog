@@ -65,3 +65,11 @@ class PostDetails(WebElement):
 
 class CategoryCollection(WebElementCollection):
     _locator = locators.CATEGORIES
+
+
+class PostTagCollection(WebElementCollection):
+    _locator = locators.POST_TAGS
+
+
+class PostCategoryCollection(WebElementCollection):
+    _locator = locators.POST_CATEGORIES

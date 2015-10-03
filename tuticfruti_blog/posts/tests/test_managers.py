@@ -30,7 +30,8 @@ class TestPostManager(test.TestCase):
 class TestCommentManager(test.TestCase):
     def setUp(self):
         self.user = UserFactory()
-        self.post = factories.PostFactory(author=self.user, status_id=models.Post.STATUS_PUBLISHED)
+        self.post = factories.PostFactory(
+            author=self.user, status_id=models.Post.STATUS_PUBLISHED)
         self.published_comment = factories.CommentFactory(
             post=self.post, status_id=models.Comment.STATUS_PUBLISHED)
         self.draft_comment = factories.CommentFactory(

@@ -23,14 +23,14 @@
         <!-- Post categories -->
         <span class="post_categories">
           {% for category in post.categories.all %}
-            <em class="label label-primary">{{ category.name }}</em>
+            <a href="{% url 'posts:list_by_category' category.slug %}" title="Filter by {{ category.name }} category" class="category label label-primary text"><em>{{ category.name }}</em></a>
           {% endfor %}
         </span>
 
         <!-- Post tags -->
         <span class="post_tags">
           {% for tag in post.tags.all %}
-            <em class="label label-info">{{ tag.term }}</em>
+            <a href="{% url 'posts:search' %}?search_terms={{ tag.name }}" title="Search by {{ tag.name }} tag" class="tag label label-info"><em>{{ tag.term }}</em></a>
           {% endfor %}
         </span>
 

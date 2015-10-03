@@ -50,7 +50,7 @@ DEBUG_TOOLBAR_CONFIG = {
     ],
     'SHOW_TEMPLATE_CONTEXT': True,
     'RENDER_PANELS': True,
-    'JQUERY_URL': '',
+    'JQUERY_URL': '/static/bower_components/jquery/dist/jquery.min.js',
 }
 
 # django-extensions
@@ -62,3 +62,10 @@ INSTALLED_APPS += ('django_extensions', )
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 # Your local stuff: Below this line define 3rd party library settings
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'mydatabase',
+    }
+}

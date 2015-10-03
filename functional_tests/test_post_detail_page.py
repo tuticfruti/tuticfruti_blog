@@ -4,6 +4,7 @@ import datetime
 from selenium.common import exceptions as selenium_exceptions
 
 from django.utils import timezone
+from django.core.urlresolvers import reverse
 
 from . import functional_test
 from .pom import pages
@@ -115,3 +116,22 @@ class TestPostDetailPage(functional_test.FunctionalTest):
 
         with self.assertRaises(selenium_exceptions.NoSuchElementException):
             self.page.get_comment_details_by_pk(comment.pk)
+
+    def test_tag_link(self):
+        tag = factories.TagFactory(term='term0')
+        self.post.tags.add(tag)
+        self.page.reload()
+        self.page.click_on_tag_by_key(0)
+        self.assertIn(
+            reverse('posts:search'),
+            self.page.current_driver_url)
+
+    def test_category_link(self):
+        self.post.categories.add(self.python_category)
+        self.page.reload()
+        self.page.click_on_category_by_key(0)
+        self.assertIn(
+            reverse(
+                'posts:list_by_category',
+                kwargs=dict(slug=self.python_category.slug)),
+            self.page.current_driver_url)
