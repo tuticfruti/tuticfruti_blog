@@ -3,7 +3,6 @@ import factory
 import factory.fuzzy
 
 from tuticfruti_blog.core import data_fixtures
-from tuticfruti_blog.users.factories import UserFactory
 from . import models
 
 
@@ -26,7 +25,6 @@ class PostFactory(factory.DjangoModelFactory):
     class Meta:
         model = models.Post
 
-    author = factory.SubFactory(UserFactory)
     status_id = factory.fuzzy.FuzzyChoice([status_id for status_id, status_name in models.Post.STATUS_CHOICES])
     title = factory.Sequence(lambda n: 'Post title {}'.format(n))
     content = factory.fuzzy.FuzzyChoice(data_fixtures.FUZZY_TEXTS)

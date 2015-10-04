@@ -3,9 +3,7 @@ import unittest
 
 from django import test
 
-from tuticfruti_blog.users.factories import UserFactory
 from .. import models
-from .. import factories
 
 
 class TestCommentForm(test.TestCase):
