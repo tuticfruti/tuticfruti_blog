@@ -22,7 +22,7 @@ CONTENT_TEXTAREA = (By.XPATH, '//textarea[@name="content"]')
 POST_DETAILS = (By.XPATH, '//div[contains(@class, "post")]')
 
 # Element colletion locators
-POSTS = (By.XPATH, '//div[contains(@class, "post")]')
+POSTS = (By.XPATH, '//div[@id="posts_id"]//div[contains(@class, "post")]')
 COMMENTS = (By.XPATH, '//div[contains(@class, "comment")]')
 CATEGORIES = (
     By.XPATH,

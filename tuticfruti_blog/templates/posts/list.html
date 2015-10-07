@@ -1,10 +1,12 @@
 {% extends "base.html" %}
 
 {% block content %}
-  {% for post in posts %}
-    {% include 'posts/_post_detail.html' %}
-  {% empty %}
-    {% include '_results_were_not_found.html' %}
-  {% endfor %}
-  {% include "_pagination.html" %}
+  <div id="posts_id">
+    {% for post in posts %}
+      {% include 'posts/_post_detail.html' %}
+    {% empty %}
+      {% include '_results_were_not_found.html' %}
+    {% endfor %}
+    {% include "_pagination.html" %}
+  </div>
 {% endblock content %}

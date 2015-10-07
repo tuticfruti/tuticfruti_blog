@@ -70,7 +70,7 @@ class PostDetailView(edit_mixins.FormMixin, generic_views.DetailView):
             .prefetch_related(
                 Prefetch('comments', queryset=models.Comment.objects.all_published()),
                 Prefetch('tags', queryset=models.Tag.objects.all()),
-                Prefetch('categories', queryset=models.Category.objects.all())) \
+                Prefetch('categories', queryset=models.Category.objects.all_enabled())) \
             .select_related('author')
         return queryset
 

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
+import re
+
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException
 
 from functional_tests.pom import page_elements
 
@@ -42,3 +43,16 @@ class BasePage:
 
     def __exit__(self, type, value, traceback):
         self.close()
+
+    def _get_post_details(self, element):
+        regex = re.search(r'post([0-9]+)_id', element.get_attribute('id'))
+        return dict(
+            id=int(regex.group(1)),
+            pk=int(regex.group(1)),
+            categories=element.find_element_by_class_name('post_categories').text,
+            author=element.find_element_by_class_name('post_author').text,
+            title=element.find_element_by_class_name('post_title').text,
+            created=element.find_element_by_class_name('post_created').text,
+            content=element.find_element_by_class_name('post_content').text,
+            tags=element.find_element_by_class_name('post_tags').text,
+            num_comments=element.find_element_by_class_name('comments__count').text)

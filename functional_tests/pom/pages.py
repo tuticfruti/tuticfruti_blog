@@ -23,6 +23,7 @@ class HomePage(BasePage):
 
     # Web element collections
     _posts = page_elements.PostCollection()
+    _categories = page_elements.CategoryCollection()
 
     @property
     def current_page(self):
@@ -30,7 +31,7 @@ class HomePage(BasePage):
         try:
             return int(regex.group(1))
         except ValueError:
-            return
+            return 0
 
     def goto_home_page(self):
         self._home_page_link.click()
@@ -70,28 +71,22 @@ class HomePage(BasePage):
         self.click_on_read_me_link(pk)
 
     def click_on_read_me_link(self, pk):
-        post_element = self._driver.find_element_by_id('post{}_id'.format(str(pk)))
+        post_element = self._driver.find_element_by_id(
+            'post{}_id'.format(str(pk)))
         read_more_link = post_element.find_element_by_class_name('read_more')
         read_more_link.click()
 
     def click_on_num_comments_link(self, pk):
-        post_element = self._driver.find_element_by_id('post{}_id'.format(str(pk)))
-        comments_link = post_element.find_element_by_class_name('comments__count')
+        post_element = self._driver.find_element_by_id(
+            'post{}_id'.format(str(pk)))
+        comments_link = post_element.find_element_by_class_name(
+            'comments__count')
         comments_link.click()
 
-    def _get_post_details(self, post_element):
-        return dict(
-            categories=post_element.find_element_by_class_name('post_categories').text,
-            author=post_element.find_element_by_class_name('post_author').text,
-            title=post_element.find_element_by_class_name('post_title').text,
-            created=post_element.find_element_by_class_name('post_created').text,
-            content=post_element.find_element_by_class_name('post_content').text,
-            tags=post_element.find_element_by_class_name('post_tags').text,
-            num_comments=post_element.find_element_by_class_name('comments__count').text)
-
     def get_post_details_by_pk(self, pk):
-        post_element = self._driver.find_element_by_id('posts_id').find_element_by_id(
-            'post{}_id'.format(str(pk)))
+        post_element = self._driver \
+            .find_element_by_id('posts_id') \
+            .find_element_by_id('post{}_id'.format(str(pk)))
         return self._get_post_details(post_element)
 
     def get_post_details_by_key(self, key):
@@ -99,24 +94,35 @@ class HomePage(BasePage):
         return self._get_post_details(post_element)
 
     def select_category(self, pk):
-        category_element = self._driver.find_element_by_id('category{}_id'.format(str(pk)))
+        category_element = self._driver.find_element_by_id(
+            'category{}_id'.format(str(pk)))
         category_element.click()
 
     def is_category_enabled(self, pk):
-        category_element = self._driver.find_element_by_id('category{}_id'.format(str(pk)))
+        category_element = self._driver.find_element_by_id(
+            'category{}_id'.format(str(pk)))
         return 'active' in category_element.get_attribute('class')
 
     def is_category_displayed(self, pk):
         try:
-            category_element = self._driver.find_element_by_id('category{}_id'.format(str(pk)))
+            category_element = self._driver.find_element_by_id(
+                'category{}_id'.format(str(pk)))
             if category_element:
                 return True
         except selenium_exceptions.NoSuchElementException:
             return
 
     def get_category_details_by_key(self, key):
+        category_element = self._categories[key]
+        regex = re.search(
+            r'category([0-9]+)_id', category_element.get_attribute('id'))
         return dict(
-            name=self._categories[key].text)
+            id=int(regex.group(1)),
+            pk=int(regex.group(1)),
+            name=category_element.text)
+
+    def count_categories(self):
+        return len(self._categories)
 
 
 class PostDetailsPage(BasePage):
@@ -150,11 +156,14 @@ class PostDetailsPage(BasePage):
     def count_comments(self):
         return len(self._comments)
 
-    def _get_comment_details(self, comment_element):
+    def _get_comment_details(self, element):
+        regex = re.search(r'comment([0-9]+)_id', element.get_attribute('id'))
         return dict(
-            created=comment_element.find_element_by_class_name('created').text,
-            author=comment_element.find_element_by_class_name('author').text,
-            content=comment_element.find_element_by_class_name('content').text)
+            id=int(regex.group(1)),
+            pk=int(regex.group(1)),
+            created=element.find_element_by_class_name('created').text,
+            author=element.find_element_by_class_name('author').text,
+            content=element.find_element_by_class_name('content').text)
 
     def get_comment_details_by_key(self, key):
         comment_element = self._comments[key]
@@ -167,16 +176,11 @@ class PostDetailsPage(BasePage):
 
     def get_post_details(self):
         post_element = self._driver.find_element_by_class_name('post')
-        return dict(
-            author=post_element.find_element_by_class_name('post_author').text,
-            title=post_element.find_element_by_class_name('post_title').text,
-            created=post_element.find_element_by_class_name('post_created').text,
-            content=post_element.find_element_by_class_name('post_content').text,
-            tags=post_element.find_element_by_class_name('post_tags').text,
-            num_comments=post_element.find_element_by_class_name('comments__count').text)
+        return self._get_post_details(post_element)
 
     def is_empty_message_visible(self):
-        return 'Results were not found.' in self._driver.find_element_by_id('comments_id').text
+        return 'Results were not found.' in self._driver.find_element_by_id(
+            'comments_id').text
 
     def click_on_tag_by_key(self, key):
         tag_element = self._tags[key]
@@ -184,4 +188,16 @@ class PostDetailsPage(BasePage):
 
     def click_on_category_by_key(self, key):
         category_element = self._categories[key]
+        category_element.click()
+
+    def click_on_tag_by_text(self, text):
+        tag_element = self._driver \
+            .find_element_by_class_name('post_tags') \
+            .find_element_by_link_text(text)
+        tag_element.click()
+
+    def click_on_category_by_text(self, text):
+        category_element = self._driver \
+            .find_element_by_class_name('post_categories') \
+            .find_element_by_link_text(text)
         category_element.click()

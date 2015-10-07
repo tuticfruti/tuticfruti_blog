@@ -4,37 +4,33 @@
     <!-- Post title -->
     <h2 class="post_title text-primary">{{ post.title }}</h2>
 
-    <div class="text-muted">
+    <div class="text-muted small">
 
-      <div class="small">
+      <!-- Post author -->
+      <em>Created by</em>
+      <strong class="post_author">{{ post.author.username }}</strong>
 
-        <!-- Post author -->
-        <em>Created by</em>
-        <strong class="post_author">{{ post.author.username }}</strong>
+      <!-- Post created -->
+      &nbsp;<em>at</em>&nbsp;
+      <strong class="post_created">{{ post.created|date:'F j, Y' }}</strong>.&nbsp;
 
-        <!-- Post created -->
-        <em>,</em>&nbsp;
-        <strong class="post_created">{{ post.created|date:'F j, Y' }}</strong>.&nbsp;
+    </div>
 
-      </div>
 
-      <div>
+    <!-- Post categories -->
+    <div>
+      <span class="post_categories">
+        {% for category in post.categories.all %}
+          <a href="{% url 'posts:list_by_category' category.slug %}" title="Filter by {{ category.name }} category" class="category label label-primary text"><em>{{ category.name }}</em></a>
+        {% endfor %}
+      </span>
 
-        <!-- Post categories -->
-        <span class="post_categories">
-          {% for category in post.categories.all %}
-            <a href="{% url 'posts:list_by_category' category.slug %}" title="Filter by {{ category.name }} category" class="category label label-primary text"><em>{{ category.name }}</em></a>
-          {% endfor %}
-        </span>
-
-        <!-- Post tags -->
-        <span class="post_tags">
-          {% for tag in post.tags.all %}
-            <a href="{% url 'posts:search' %}?search_terms={{ tag.name }}" title="Search by {{ tag.name }} tag" class="tag label label-info"><em>{{ tag.term }}</em></a>
-          {% endfor %}
-        </span>
-
-      </div>
+      <!-- Post tags -->
+      <span class="post_tags">
+        {% for tag in post.tags.all %}
+          <a href="{% url 'posts:search' %}?search_terms={{ tag.term }}" title="Search by {{ tag.name }} tag" class="tag label label-info"><em>{{ tag.term }}</em></a>
+        {% endfor %}
+      </span>
 
     </div>
 
@@ -57,7 +53,7 @@
       </div>
 
       <!-- Comments number -->
-      <div class="col-sm-2 col-sm-push-8">
+      <div class="col-sm-2 col-sm-push-8 text-right">
         {% if post.comments.count %}
           <a class="comments__count label label-default label-pill" href="{% url 'posts:detail' post.slug %}#comments_id" title="Goto comments">
             {{ post.comments.count }}

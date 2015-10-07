@@ -21,3 +21,6 @@ class CommentManager(models.Manager):
 class CategoryManager(models.Manager):
     def all_enabled(self):
         return self.filter(is_enabled=True)
+
+    def all_disabled(self):
+        return self.filter(is_enabled=False)
