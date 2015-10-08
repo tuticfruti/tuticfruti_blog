@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+import markdown
+
+from django.conf import settings
 from django.db import models
 from django.core.urlresolvers import reverse
 from django.template.defaultfilters import slugify
@@ -39,6 +42,7 @@ class Category(models.Model):
 
     class Meta:
         ordering = ['order']
+        verbose_name_plural = 'categories'
 
 
 class Post(models.Model):
@@ -60,6 +64,7 @@ class Post(models.Model):
     title = models.CharField(max_length=255, unique=True)
     slug = models.SlugField(max_length=255)
     content = models.TextField(blank=True)
+    content_html = models.TextField(blank=True)
     status_id = models.CharField(
         choices=STATUS_CHOICES,
         default=STATUS_DRAFT,
@@ -70,6 +75,8 @@ class Post(models.Model):
     modified = models.DateTimeField(auto_now=True, blank=True, db_index=True)
 
     def save(self, *args, **kwargs):
+        md_instance = markdown.Markdown(settings.MARKDOWN_EXTENSIONS)
+        self.content_html = md_instance.convert(self.content)
         self.slug = slugify(self.title)
         super().save(*args, **kwargs)
 

@@ -36,9 +36,17 @@
 
     <!-- Post content -->
     {% if post_text_content_limit %}
-      <p class="post_content">{{ post.content|truncatechars:post_text_content_limit }}</p>
+      <p class="post_content">
+        {% autoescape off %}
+          {{ post.content_html|truncatechars:post_text_content_limit|striptags }}
+        {% endautoescape %}
+      </p>
     {% else %}
-      <p class="post_content">{{ post.content }}</p>
+      <p class="post_content">
+        {% autoescape off %}
+          {{ post.content_html }}
+        {% endautoescape %}
+      </p>
     {% endif %}
 
     <div class="row">

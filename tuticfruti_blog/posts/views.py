@@ -19,7 +19,7 @@ class PostListView(generic_views.ListView):
         queryset = models.Post.objects \
             .all_published() \
             .prefetch_related(
-                Prefetch('categories', queryset=models.Category.objects.all()),
+                Prefetch('categories', queryset=models.Category.objects.all_enabled()),
                 Prefetch('tags', queryset=models.Tag.objects.all()),
                 Prefetch('comments', queryset=models.Comment.objects.all_published())) \
             .select_related('author')
