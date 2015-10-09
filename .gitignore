@@ -61,3 +61,6 @@ bower_components/
 
 # Sqlite database test
 database.sqlite
+
+# static files
+staticfiles

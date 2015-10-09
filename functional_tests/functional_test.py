@@ -40,6 +40,6 @@ class FunctionalTest(StaticLiveServerTestCase):
         cls.miscellaneous_tag = models.Tag.objects.get(term='miscellaneous')
 
         # Comments
-        cls.published_comments = cls.published_post.comments.all_published()
+        cls.published_post_comments = cls.published_post.comments.all_published()
         cls.published_comment = models.Comment.objects.get(author='anonymous')
         cls.pending_comment = models.Comment.objects.get(content='Pending comment')

@@ -13,6 +13,7 @@
   {% block css %}
     <link rel="stylesheet" href="{% static 'bower_components/bootstrap/dist/css/bootstrap.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static "css/project.css" %}">
+    <link href="{% static 'ckeditor/ckeditor/plugins/codesnippet/lib/highlight/styles/' %}{{ CKE_CODESNIPPET_THEME }}.css" rel="stylesheet">
   {% endblock css %}
 
   <!-- Page title block -->
@@ -34,8 +35,15 @@
 
   <!-- Javascript block -->
   {% block javascript %}
+
+    <!-- Bootstrap -->
     <script src="{% static 'bower_components/jquery/dist/jquery.min.js' %}"></script>
     <script src="{% static 'bower_components/bootstrap/dist/js/bootstrap.min.js' %}"></script>
+
+    <!-- Code snippets -->
+    <script src="{% static 'ckeditor/ckeditor/plugins/codesnippet/lib/highlight/highlight.pack.js' %}"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+
   {% endblock javascript %}
 
 </body>

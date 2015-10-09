@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
+import re
 
 from django.core.urlresolvers import reverse
 
@@ -126,14 +127,7 @@ class TestHomePage(functional_test.FunctionalTest):
         post = self.page.get_post_details_by_pk(self.published_post.pk)
 
         self.assertEqual(
-            post.get('num_comments'), str(self.published_comments.count()))
-
-    def test_post_content_must_be_truncated(self):
-        content_size_expected = models.Post.TEXT_CONTENT_LIMIT
-        content_size = len(self.page.get_post_details_by_pk(
-            self.published_post.pk).get('content'))
-
-        self.assertLessEqual(content_size, content_size_expected)
+            post.get('num_comments'), str(self.published_post_comments.count()))
 
     def test_comments_link(self):
         url_expected = '{}{}'.format(
@@ -188,24 +182,38 @@ class TestHomePage(functional_test.FunctionalTest):
 
         self.assertEqual(current_url, url_expected)
 
-    def test_post_details(self):
-        post_element = self.page.get_post_details_by_pk(self.published_post.pk)
-        self.assertEqual(post_element.get('id'), self.published_post.id)
-        self.assertEqual(post_element.get('pk'), self.published_post.pk)
-        self.assertEqual(
-            post_element.get('author'), self.published_post.author.username)
-        self.assertEqual(post_element.get('title'), self.published_post.title)
-        self.assertEqual(post_element.get('num_comments'), str(self.published_comments.count()))
-        self.assertEqual(
-            post_element.get('created'),
-            '{dt:%B} {dt.day}, {dt.year}'.format(dt=self.published_post.created))
-        self.assertEqual(
-            post_element.get('tags'),
-            ' '.join(self.published_post.tags.all().values_list('term', flat=True)))
-        self.assertEqual(
-            post_element.get('categories'),
-            ' '.join(self.published_post.categories.all().values_list('name', flat=True)))
-        self.assertHTMLEqual(
-            post_element.get('content'),
-            '{}{}'.format(
-                self.published_post.content[:models.Post.TEXT_CONTENT_LIMIT-3], '...'))
+    def test_post_detail(self):
+        categories_expected = self.published_post.categories.all_enabled().values_list('name', flat=True)
+        tags_expected = self.published_post.tags.all().values_list('term', flat=True)
+        post_expected = self.published_post
+
+        search_result = re.search(models.Post.HR, post_expected.content)
+        if search_result:
+            content_expected = post_expected.content[:search_result.start()]
+        else:
+            content_expected = post_expected.content
+
+        comments_expected = self.published_post_comments
+        date_expected = '{dt:%B} {dt.day}, {dt.year}'.format(dt=post_expected.created)
+        post = self.page.get_post_details_by_pk(post_expected.pk)
+
+        self.assertEqual(post.get('id'), post_expected.id)
+        self.assertEqual(post.get('pk'), post_expected.pk)
+        self.assertEqual(post.get('author'), post_expected.author.username)
+        self.assertEqual(post.get('title'), post_expected.title)
+        self.assertEqual(post.get('num_comments'), str(comments_expected.count()))
+        self.assertEqual(post.get('created'), date_expected)
+        self.assertEqual(post.get('tags'), ' '.join(tags_expected))
+        self.assertEqual(post.get('categories'), ' '.join(categories_expected))
+        self.assertHTMLEqual(post.get('content'), content_expected)
+
+    def test_content_hr_truncated(self):
+        search_result = re.search(models.Post.HR, self.published_post.content)
+        if search_result:
+            content_expected = self.published_post.content[:search_result.start()].strip()
+        else:
+            self.fail('published_post.content field must contain {} string'.format(models.Post.HR))
+        post = self.page.get_post_details_by_pk(self.published_post.pk)
+        content = post.get('content')
+
+        self.assertEqual(content, content_expected)

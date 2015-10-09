@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-import markdown
-
 from django.core.urlresolvers import reverse
 from django.db import IntegrityError
 from django import test
@@ -86,7 +84,6 @@ class TestPostModel(TestModelBase):
         self.assertEqual(saved_post.title, post_expected.title)
         self.assertEqual(saved_post.slug, post_expected.slug)
         self.assertEqual(saved_post.content, post_expected.content)
-        self.assertEqual(saved_post.content_html, post_expected.content_html)
         self.assertEqual(saved_post.status_id, post_expected.status_id)
         self.assertEqual(saved_post.tags, post_expected.tags)
         self.assertEqual(saved_post.created, post_expected.created)
@@ -149,14 +146,6 @@ class TestPostModel(TestModelBase):
         post_expected = self.published_posts.first()
 
         self.assertEqual(post, post_expected)
-
-    def test_content_html_field_is_saved(self):
-        md_instance = markdown.Markdown(
-            extensions=settings.MARKDOWN_EXTENSIONS)
-        html_expected = md_instance.convert(self.published_post.content)
-        html = self.published_post.content_html
-
-        self.assertEqual(html, html_expected)
 
 
 class TestTagModel(TestModelBase):

@@ -15,26 +15,27 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Category',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', primary_key=True, serialize=False, auto_created=True)),
+                ('id', models.AutoField(primary_key=True, auto_created=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=100, unique=True)),
                 ('slug', models.SlugField(max_length=25)),
                 ('order', models.IntegerField(default=0)),
                 ('is_enabled', models.BooleanField(default=True)),
             ],
             options={
+                'verbose_name_plural': 'categories',
                 'ordering': ['order'],
             },
         ),
         migrations.CreateModel(
             name='Comment',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', primary_key=True, serialize=False, auto_created=True)),
-                ('status_id', models.CharField(db_index=True, choices=[('pending', 'Pending'), ('published', 'Published')], max_length=10, default='pending')),
+                ('id', models.AutoField(primary_key=True, auto_created=True, serialize=False, verbose_name='ID')),
+                ('status_id', models.CharField(db_index=True, max_length=10, choices=[('pending', 'Pending'), ('published', 'Published')], default='pending')),
                 ('author', models.CharField(db_index=True, max_length=100)),
                 ('email', models.EmailField(db_index=True, max_length=254)),
                 ('content', models.TextField()),
                 ('created', models.DateTimeField(db_index=True, auto_now_add=True)),
-                ('modified', models.DateTimeField(auto_now=True, db_index=True)),
+                ('modified', models.DateTimeField(db_index=True, auto_now=True)),
             ],
             options={
                 'ordering': ['-created'],
@@ -43,14 +44,14 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Post',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', primary_key=True, serialize=False, auto_created=True)),
+                ('id', models.AutoField(primary_key=True, auto_created=True, serialize=False, verbose_name='ID')),
                 ('title', models.CharField(max_length=255, unique=True)),
                 ('slug', models.SlugField(max_length=255)),
                 ('content', models.TextField(blank=True)),
-                ('status_id', models.CharField(db_index=True, choices=[('draft', 'Draft'), ('published', 'Published')], max_length=10, default='draft')),
+                ('status_id', models.CharField(db_index=True, max_length=10, choices=[('draft', 'Draft'), ('published', 'Published')], default='draft')),
                 ('created', models.DateTimeField(db_index=True, auto_now_add=True)),
-                ('modified', models.DateTimeField(auto_now=True, db_index=True)),
-                ('author', models.ForeignKey(to=settings.AUTH_USER_MODEL, related_name='posts')),
+                ('modified', models.DateTimeField(db_index=True, auto_now=True)),
+                ('author', models.ForeignKey(related_name='posts', to=settings.AUTH_USER_MODEL)),
                 ('categories', models.ManyToManyField(to='posts.Category', related_name='posts')),
             ],
             options={
@@ -60,7 +61,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Tag',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', primary_key=True, serialize=False, auto_created=True)),
+                ('id', models.AutoField(primary_key=True, auto_created=True, serialize=False, verbose_name='ID')),
                 ('term', models.CharField(max_length=255, unique=True)),
             ],
             options={
@@ -75,6 +76,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='comment',
             name='post',
-            field=models.ForeignKey(to='posts.Post', related_name='comments'),
+            field=models.ForeignKey(related_name='comments', to='posts.Post'),
         ),
     ]

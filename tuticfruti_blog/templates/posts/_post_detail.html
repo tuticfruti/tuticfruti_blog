@@ -1,3 +1,5 @@
+{% load hr_truncate from posts_filters %}
+
 <div id="post{{ post.pk }}_id" class="row post">
   <div class="col-sm-12">
 
@@ -18,7 +20,7 @@
 
 
     <!-- Post categories -->
-    <div>
+    <p>
       <span class="post_categories">
         {% for category in post.categories.all %}
           <a href="{% url 'posts:list_by_category' category.slug %}" title="Filter by {{ category.name }} category" class="category label label-primary text"><em>{{ category.name }}</em></a>
@@ -32,19 +34,19 @@
         {% endfor %}
       </span>
 
-    </div>
+    </p>
 
     <!-- Post content -->
-    {% if post_text_content_limit %}
+    {% if posts %}
       <p class="post_content">
         {% autoescape off %}
-          {{ post.content_html|truncatechars:post_text_content_limit|striptags }}
+          {{ post.content|hr_truncate:'left' }}
         {% endautoescape %}
       </p>
     {% else %}
       <p class="post_content">
         {% autoescape off %}
-          {{ post.content_html }}
+          {{ post.content|hr_truncate:'right' }}
         {% endautoescape %}
       </p>
     {% endif %}

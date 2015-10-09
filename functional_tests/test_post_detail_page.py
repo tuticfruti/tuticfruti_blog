@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-import datetime
+import unittest
+import re
 
 from django.core.urlresolvers import reverse
 
@@ -20,27 +21,31 @@ class TestPostDetailPage(functional_test.FunctionalTest):
     def tearDown(self):
         self.page.close()
 
-    def test_post_details(self):
-        post_element = self.page.get_post_details()
+    def test_post_detail(self):
+        post_expected = self.published_post
 
-        self.assertEqual(post_element.get('id'), self.published_post.id)
-        self.assertEqual(post_element.get('pk'), self.published_post.pk)
-        self.assertEqual(
-            post_element.get('author'), self.published_post.author.username)
-        self.assertEqual(post_element.get('title'), self.published_post.title)
-        self.assertEqual(post_element.get('num_comments'), str(10))
-        self.assertEqual(
-            post_element.get('created'),
-            '{dt:%B} {dt.day}, {dt.year}'.format(dt=self.published_post.created))
-        self.assertEqual(
-            post_element.get('tags'),
-            ' '.join(self.published_post.tags.all().values_list('term', flat=True)))
-        self.assertEqual(
-            post_element.get('categories'),
-            ' '.join(self.published_post.categories.all_enabled().values_list('name', flat=True)))
-        self.assertHTMLEqual(
-            post_element.get('content'),
-            self.published_post.content)
+        search_result = re.search(models.Post.HR, post_expected.content)
+        if search_result:
+            content_expected = post_expected.content[search_result.start() + len(models.Post.HR):]
+        else:
+            content_expected = post_expected.content
+
+        categories_expected = post_expected.categories.all_enabled().values_list('name', flat=True)
+        tags_expected = post_expected.tags.all().values_list('term', flat=True)
+        comments_expected = self.published_post_comments
+        date_expected = '{dt:%B} {dt.day}, {dt.year}'.format(dt=post_expected.created)
+
+        post = self.page.get_post_details()
+
+        self.assertEqual(post.get('id'), post_expected.id)
+        self.assertEqual(post.get('pk'), post_expected.pk)
+        self.assertEqual(post.get('author'), post_expected.author.username)
+        self.assertEqual(post.get('title'), post_expected.title)
+        self.assertEqual(post.get('num_comments'), str(comments_expected.count()))
+        self.assertEqual(post.get('created'), date_expected)
+        self.assertEqual(post.get('tags'), ' '.join(tags_expected))
+        self.assertEqual(post.get('categories'), ' '.join(categories_expected))
+        self.assertHTMLEqual(post.get('content'), content_expected)
 
     def test_comments_sorted_by_created_field(self):
         comment_expected = factories.CommentFactory(
@@ -59,7 +64,6 @@ class TestPostDetailPage(functional_test.FunctionalTest):
             comment.get('created'),
             '{dt:%B} {dt.day}, {dt.year}'.format(dt=self.published_comment.created))
         self.assertEqual(comment.get('author'), self.published_comment.author)
-        self.assertEqual(comment.get('email'), self.published_comment.content)
         self.assertEqual(comment.get('content'), self.published_comment.content)
 
     def test_all_comments_are_displayed(self):
@@ -72,10 +76,15 @@ class TestPostDetailPage(functional_test.FunctionalTest):
         self.assertTrue(self.page.is_empty_message_visible())
 
     def test_post_content_is_not_truncated(self):
-        post_element = self.page.get_post_details()
+        post_expected = self.published_post
+        search_result = re.search(models.Post.HR, post_expected.content)
+        if search_result:
+            content_expected = post_expected.content[:search_result.start()]
+        else:
+            content_expected = post_expected.content
+        content = self.page.get_post_details().get('content')
 
-        self.assertEqual(
-            len(self.published_post.content), len(post_element.get('content')))
+        self.assertEqual(len(content), len(content_expected))
 
     def test_send_new_comment(self):
         url_expected = self.page.current_driver_url
@@ -88,7 +97,7 @@ class TestPostDetailPage(functional_test.FunctionalTest):
         num_comments = self.page.count_comments()
 
         # Comments for published_post increments by 1
-        self.assertEqual(num_comments, self.published_comments.count())
+        self.assertEqual(num_comments, self.published_post_comments.count())
         # Send a comment redirects user to the same post page
         self.assertEqual(url, url_expected)
         # New comment is pending and not visible

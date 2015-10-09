@@ -33,6 +33,10 @@ DJANGO_APPS = (
 
     # Admin
     'django.contrib.admin',
+
+    # CKEditor
+    'ckeditor',
+    'ckeditor_uploader',
 )
 THIRD_PARTY_APPS = (
     'crispy_forms',  # Form layouts
@@ -45,6 +49,7 @@ THIRD_PARTY_APPS = (
 LOCAL_APPS = (
     'tuticfruti_blog.users',  # custom users app
     # Your stuff: custom apps go here
+    'tuticfruti_blog.core',
     'tuticfruti_blog.posts',
 )
 
@@ -159,6 +164,7 @@ TEMPLATES = [
                 'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
                 # Your stuff: custom template context processors go here
+                'tuticfruti_blog.core.context_processors.ckeditor'
             ],
         },
     },
@@ -257,22 +263,22 @@ LOGGING = {
 
 # Your common stuff: Below this line define 3rd party library settings
 
-MARKDOWN_EXTENSIONS = [
-    'markdown.extensions.extra',
-    #   'markdown.extensions.abbr',
-    #   'markdown.extensions.attr_list',
-    #   'markdown.extensions.def_list',
-    #   'markdown.extensions.fenced_code',
-    #   'markdown.extensions.footnotes',
-    #   'markdown.extensions.tables',
-    #   'markdown.extensions.smart_strong',
-    'markdown.extensions.admonition',
-    'markdown.extensions.codehilite',
-    'markdown.extensions.headerid',
-    'markdown.extensions.meta',
-    'markdown.extensions.nl2br',
-    'markdown.extensions.sane_lists',
-    'markdown.extensions.smarty',
-    'markdown.extensions.toc',
-    'markdown.extensions.wikilinks',
-]
+# CKEditor
+
+CKEDITOR_UPLOAD_PATH = "uploads/"
+CKEDITOR_IMAGE_BACKEND = "Pillow"
+CKEDITOR_CONFIGS = {
+    'default': {
+        'skin': 'moono',
+        'toolbar': 'full',
+        'contentsCss': '{}{}'.format(
+            STATIC_URL, 'bower_components/bootstrap/dist/css/bootstrap.css'),
+
+        # Highlightjs demo: https://highlightjs.org/static/demo/
+        'codeSnippet_theme': 'default',
+        'extraPlugins': ','.join(
+            [
+                'codesnippet'
+            ]),
+    },
+}

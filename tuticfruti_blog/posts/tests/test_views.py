@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import unittest
+import re
 
 from django.core.urlresolvers import reverse
 from django import test
@@ -23,7 +24,8 @@ class TestViewCommonMixin:
 
     def test_url_conf_resolver(self):
         if self.view is None:
-            self.fail('Variable class "view" was not defined in {} class'.format(self.__class__.__name__))
+            self.fail('Variable class "view" was not defined in {} class'.format(
+                self.__class__.__name__))
         func_name_expected = self.view.as_view().__name__
         func_name = self.res.resolver_match.func.__name__
 
@@ -31,7 +33,8 @@ class TestViewCommonMixin:
 
     def test_posts_variable_is_available_in_context_data(self):
         if self.context_data_vars is None:
-            self.fail('Variable class "context_data_vars" was not defined in {} class'.format(self.__class__.__name__))
+            self.fail('Variable class "context_data_vars" was not defined in {} class'.format(
+                self.__class__.__name__))
         context_data = self.res.context_data
 
         for key_expected in self.context_data_vars:
@@ -39,7 +42,8 @@ class TestViewCommonMixin:
 
     def test_template_name(self):
         if self.template_name is None:
-            self.fail('Variable class "template_name" was not defined in {} class'.format(self.__class__.__name__))
+            self.fail('Variable class "template_name" was not defined in {} class'.format(
+                self.__class__.__name__))
         template_expected = self.template_name
         template = self.res.template_name
 
@@ -73,8 +77,7 @@ class TestViewBase(test.TestCase):
             .order_by(*models.Category._meta.ordering)
         cls.python_category = models.Category.objects.get(slug='python')
         cls.first_category = models.Category.objects.get(slug='first-category')
-        cls.disabled_category = models.Category.objects.get(
-            slug='disabled-category')
+        cls.disabled_category = models.Category.objects.get(slug='disabled-category')
 
         # Tags
         cls.tags = models.Tag.objects.all().order_by(*models.Tag._meta.ordering)
@@ -92,7 +95,7 @@ class TestViewBase(test.TestCase):
 
 class TestPostListView(TestViewCommonMixin, TestViewBase):
     view = views.PostListView
-    context_data_vars = ['posts', 'categories', 'post_text_content_limit']
+    context_data_vars = ['posts', 'categories']
     template_name = 'posts/list.html'
 
     def setUp(self):
@@ -136,8 +139,7 @@ class TestPostListByCategoryView(TestViewCommonMixin, TestViewBase):
             kwargs=dict(slug=self.python_category.slug)))
 
     def test_filter_posts_by_python_category(self):
-        posts_expected = self.published_posts \
-            .filter(categories__in=[self.python_category])
+        posts_expected = self.published_posts.filter(categories__in=[self.python_category])
         posts = self.res.context_data.get('posts')
 
         for i in range(len(posts)):
@@ -155,21 +157,15 @@ class TestPostListSearchView(TestViewCommonMixin, TestViewBase):
             dict(search_terms='python'))
 
     def test_search_is_case_insensitive(self):
-        posts_expected = self.published_posts \
-            .filter(tags__in=[self.python_tag])
-        self.res = self.client.get(
-            reverse('posts:search'), dict(search_terms='PYTHON'))
+        posts_expected = self.published_posts.filter(tags__in=[self.python_tag])
+        self.res = self.client.get(reverse('posts:search'), dict(search_terms='PYTHON'))
         posts = self.res.context_data.get('posts')
 
         self.assertEqual(posts.count(), posts_expected.count())
 
     def test_result_has_no_repeated(self):
-        posts_expected = self.published_posts \
-            .filter(tags__in=[self.python_tag]) \
-            .distinct()
-        self.res = self.client.get(
-            reverse('posts:search'),
-            dict(search_terms='python python'))
+        posts_expected = self.published_posts.filter(tags__in=[self.python_tag]).distinct()
+        self.res = self.client.get(reverse('posts:search'), dict(search_terms='python python'))
         posts = self.res.context_data.get('posts')
 
         self.assertEqual(posts.count(), posts_expected.count())

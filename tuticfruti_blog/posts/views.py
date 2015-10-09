@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+import re
+
+from django.db.models import F
+from django.db.models.functions import Substr
 from django.views import generic as generic_views
 from django.views.generic import edit as edit_mixins
 from django.db.models import Prefetch
@@ -16,18 +20,21 @@ class PostListView(generic_views.ListView):
     paginate_orphans = models.Post.PAGINATE_ORPHANS
 
     def get_queryset(self):
+        categories = models.Category.objects.all_enabled()
+        tags = models.Tag.objects.all()
+        comments = models.Comment.objects.all_published()
+
         queryset = models.Post.objects \
             .all_published() \
             .prefetch_related(
-                Prefetch('categories', queryset=models.Category.objects.all_enabled()),
-                Prefetch('tags', queryset=models.Tag.objects.all()),
-                Prefetch('comments', queryset=models.Comment.objects.all_published())) \
+                Prefetch('categories', queryset=categories),
+                Prefetch('tags', queryset=tags),
+                Prefetch('comments', queryset=comments)) \
             .select_related('author')
         return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['post_text_content_limit'] = models.Post.TEXT_CONTENT_LIMIT
         context['categories'] = models.Category.objects.all_enabled()
         return context
 
@@ -65,12 +72,16 @@ class PostDetailView(edit_mixins.FormMixin, generic_views.DetailView):
     context_object_name = 'post'
 
     def get_queryset(self):
+        categories = models.Category.objects.all_enabled()
+        tags = models.Tag.objects.all()
+        comments = models.Comment.objects.all_published()
+
         queryset = models.Post.objects \
             .filter(slug=self.kwargs.get('slug')) \
             .prefetch_related(
-                Prefetch('comments', queryset=models.Comment.objects.all_published()),
-                Prefetch('tags', queryset=models.Tag.objects.all()),
-                Prefetch('categories', queryset=models.Category.objects.all_enabled())) \
+                Prefetch('comments', queryset=comments),
+                Prefetch('tags', queryset=tags),
+                Prefetch('categories', queryset=categories)) \
             .select_related('author')
         return queryset
 

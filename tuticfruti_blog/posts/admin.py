@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 from django.contrib import admin
 
+from ckeditor.widgets import CKEditorWidget
+from ckeditor.fields import RichTextField
+
 from . import models
 
 

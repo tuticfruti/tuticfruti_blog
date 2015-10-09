@@ -84,9 +84,7 @@ class LoadPostData(DataFixtures):
             title='Published post',
             status_id=models.Post.STATUS_PUBLISHED,
             categories=categories,
-            tags=tags,
-            content=factories.FUZZY_TEXTS[5]  # Size > TEXT_CONTENT_LIMIT
-            )
+            tags=tags)
 
         # Draft post
         factories.PostFactory(
