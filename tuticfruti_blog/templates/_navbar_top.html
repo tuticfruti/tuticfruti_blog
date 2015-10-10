@@ -1,24 +1,67 @@
 {% load static %}
 
-<nav id="navbar-top" class="navbar navbar-light navbar-fixed-top bg-faded row"> <!-- nav -->
-  <div class="col-xs-12 col-sm-7">
-    <a class="navbar-brand" href="{% url 'home' %}" title="Tuticfruti blog">Tuticfruti</a>
-    <ul id="categories_id" class="nav navbar-nav">
-      {% for category in categories %}
-        <li class="nav-item">
-          <a id="category{{ category.pk }}_id" href="{% url 'posts:list_by_category' category.slug %}" class="category nav-link {% if category.slug == current_category %} active{% endif %}">{{ category.name }}</a>
-        </li>
-      {% endfor %}
-    </ul>
-  </div>
-  <div class="col-xs-12 col-sm-5">
-    <form id="search_form_id" action="{% if current_category %}{% url 'posts:search_by_category' current_category %}{% else %}{% url 'posts:search' %}{% endif %}" method="get" class="form-inline navbar-form pull-right">
-      <div class="input-group">
-        <input name="search_terms" type="text" class="form-control" placeholder="Search ..." value="{% if search_terms %}{{ search_terms }}{% endif %}" aria-label="">
-        <span class="input-group-btn">
-          <button class="btn btn-secondary" type="submit">Go!</button>
-        </span>
+<nav id="navbar-top" class="navbar navbar-light navbar-fixed-top bg-faded"> <!-- nav -->
+
+  <div class="row">
+    <div class="col-xs-12">
+      <div class="collapse" id="exCollapsingNavbar">
+        <div class="bg-faded p-a">
+
+          <div id="categories_responsive_id" class="list-group listgroup"> <!-- list-group -->
+            {% for category in categories %}
+              {% if category.slug == current_category %}
+                <a id="category{{ category.pk }}_id" href="#" class="category list-group-item active">{{ category.name }}</a>
+              {% else %}
+                <a id="category{{ category.pk }}_id" href="{% url 'posts:list_by_category' category.slug %}" class="category list-group-item">{{ category.name }}</a>
+              {% endif %}
+            {% endfor %}
+          </div> <!-- /list-group -->
+
+          <br>
+
+          <form id="search_form_responsive_id" action="{% if current_category %}{% url 'posts:search_by_category' current_category %}{% else %}{% url 'posts:search' %}{% endif %}" method="get" class="navbar-form">
+            <div class="input-group">
+              <input name="search_terms" type="text" class="form-control" placeholder="Search ..." value="{% if search_terms %}{{ search_terms }}{% endif %}" aria-label="">
+              <span class="input-group-btn">
+                <button class="btn btn-secondary" type="submit">Go!</button>
+              </span>
+            </div>
+          </form>
+
+        </div>
       </div>
-    </form>
+    </div>
+  </div>
+
+  <div class="row">
+
+    <div class="col-sm-11 col-md-8">
+      <a class="navbar-brand" href="{% url 'home' %}" title="Tuticfruti blog">Tuticfruti blog</a>
+      <ul id="categories_id" class="nav navbar-nav hidden-sm-down">
+        {% for category in categories %}
+          <li class="nav-item">
+            <a id="category{{ category.pk }}_id" href="{% url 'posts:list_by_category' category.slug %}" class="category nav-link {% if category.slug == current_category %} active{% endif %}">{{ category.name }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="col-md-4 hidden-sm-down">
+      <form class="form-inline pull-right" id="search_form_id" action="{% if current_category %}{% url 'posts:search_by_category' current_category %}{% else %}{% url 'posts:search' %}{% endif %}" method="get" class="navbar-form">
+        <div class="input-group">
+          <input name="search_terms" type="text" class="form-control" placeholder="Search ..." value="{% if search_terms %}{{ search_terms }}{% endif %}" aria-label="">
+          <span class="input-group-btn">
+            <button class="btn btn-secondary" type="submit">Go!</button>
+          </span>
+        </div>
+      </form>
+    </div>
+
+    <div class="col-sm-1 pull-right hidden-md-up">
+      <button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#exCollapsingNavbar">
+        &#9776;
+      </button>
+    </div>
+
   </div>
 </nav> <!-- /nav -->

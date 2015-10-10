@@ -8,13 +8,13 @@ from .. import models
 register = template.Library()
 
 
-@register.filter(is_safe=True)
+@register.filter
 @stringfilter
 def hr_truncate(value, arg):
     search_result = re.search(models.Post.HR, value)
-    if search_result and arg == 'left':
+    if search_result and arg == 'prev':
         value = value[:search_result.start()]
-    if search_result and arg == 'right':
+    if search_result and arg == 'next':
         value = value[search_result.start() + len(models.Post.HR):]
 
     return value

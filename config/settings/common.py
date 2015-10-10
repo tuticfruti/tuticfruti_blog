@@ -278,7 +278,9 @@ CKEDITOR_CONFIGS = {
         'codeSnippet_theme': 'default',
         'extraPlugins': ','.join(
             [
-                'codesnippet'
+                'codesnippet',
+                'dialog',
+                'tableresize',
             ]),
     },
 }

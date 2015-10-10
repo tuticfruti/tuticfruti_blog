@@ -1,8 +1,4 @@
 # -*- coding: utf-8 -*-
-import re
-
-from django.db.models import F
-from django.db.models.functions import Substr
 from django.views import generic as generic_views
 from django.views.generic import edit as edit_mixins
 from django.db.models import Prefetch
