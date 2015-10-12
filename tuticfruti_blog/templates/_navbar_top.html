@@ -1,6 +1,6 @@
 {% load static %}
 
-<nav id="navbar-top" class="navbar navbar-light navbar-fixed-top bg-faded"> <!-- nav -->
+<nav id="navbar-top" class="navbar navbar-light navbar-fixed-top bg-faded">
 
   <div class="row">
     <div class="col-xs-12">
@@ -10,9 +10,9 @@
           <div id="categories_responsive_id" class="list-group listgroup"> <!-- list-group -->
             {% for category in categories %}
               {% if category.slug == current_category %}
-                <a id="category{{ category.pk }}_id" href="#" class="category list-group-item active">{{ category.name }}</a>
+                <a id="category_responsive{{ category.pk }}_id" href="#" class="category list-group-item active">{{ category.name }}</a>
               {% else %}
-                <a id="category{{ category.pk }}_id" href="{% url 'posts:list_by_category' category.slug %}" class="category list-group-item">{{ category.name }}</a>
+                <a id="category_responsive{{ category.pk }}_id" href="{% url 'posts:list_by_category' category.slug %}" class="category list-group-item">{{ category.name }}</a>
               {% endif %}
             {% endfor %}
           </div> <!-- /list-group -->
@@ -23,7 +23,7 @@
             <div class="input-group">
               <input name="search_terms" type="text" class="form-control" placeholder="Search ..." value="{% if search_terms %}{{ search_terms }}{% endif %}" aria-label="">
               <span class="input-group-btn">
-                <button class="btn btn-secondary" type="submit">Go!</button>
+                <button class="btn btn-primary" type="submit">Go!</button>
               </span>
             </div>
           </form>
@@ -51,7 +51,7 @@
         <div class="input-group">
           <input name="search_terms" type="text" class="form-control" placeholder="Search ..." value="{% if search_terms %}{{ search_terms }}{% endif %}" aria-label="">
           <span class="input-group-btn">
-            <button class="btn btn-secondary" type="submit">Go!</button>
+            <button class="btn btn-primary" type="submit">Go!</button>
           </span>
         </div>
       </form>
@@ -64,4 +64,4 @@
     </div>
 
   </div>
-</nav> <!-- /nav -->
+</nav>

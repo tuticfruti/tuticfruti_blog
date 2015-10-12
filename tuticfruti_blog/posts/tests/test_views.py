@@ -184,6 +184,12 @@ class TestPostListSearchView(TestViewCommonMixin, TestViewBase):
 
         self.assertEqual(posts.count(), posts_expected.count())
 
+    def test_search_is_case_unsensitive(self):
+        self.fails('test_search_is_case_unsensitive FAULT')
+
+    def test_search_consider_also_title_field(self):
+        self.fails('test_search_in_title_too FAULT')
+
 
 class TestPostDetailView(TestViewCommonMixin, TestViewBase):
     view = views.PostDetailView

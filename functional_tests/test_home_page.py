@@ -207,7 +207,7 @@ class TestHomePage(functional_test.FunctionalTest):
         self.assertEqual(post.get('categories'), ' '.join(categories_expected))
         self.assertHTMLEqual(post.get('content'), content_expected)
 
-    def test_content_hr_truncated(self):
+    def test_post_content_is_hr_truncated(self):
         search_result = re.search(models.Post.HR, self.published_post.content)
         if search_result:
             content_expected = self.published_post.content[:search_result.start()].strip()

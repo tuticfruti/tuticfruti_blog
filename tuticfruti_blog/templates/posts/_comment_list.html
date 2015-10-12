@@ -2,7 +2,7 @@
   <div id="comments_id" class="col-sm-12">
     <h4 class="text-muted">Comments:</h4>
       {% for comment in post.comments.all %}
-        {% include 'posts/__comment_detail.html' %}
+        {% include 'posts/_comment_detail.html' %}
       {% empty %}
         {% include '_results_were_not_found.html' %}
       {% endfor %}

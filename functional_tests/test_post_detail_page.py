@@ -75,11 +75,11 @@ class TestPostDetailPage(functional_test.FunctionalTest):
 
         self.assertTrue(self.page.is_empty_message_visible())
 
-    def test_post_content_is_not_truncated(self):
+    def test_post_content_is_hr_truncated(self):
         post_expected = self.published_post
         search_result = re.search(models.Post.HR, post_expected.content)
         if search_result:
-            content_expected = post_expected.content[:search_result.start()]
+            content_expected = post_expected.content[search_result.start() + len(models.Post.HR):].strip()
         else:
             content_expected = post_expected.content
         content = self.page.get_post_details().get('content')

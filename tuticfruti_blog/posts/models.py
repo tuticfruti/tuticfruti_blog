@@ -12,11 +12,6 @@ from tuticfruti_blog.users.models import User
 class Tag(models.Model):
     term = models.CharField(max_length=255, unique=True)
 
-    def save(self, *args, **kwargs):
-        if self.term:
-            self.term = self.term.lower()
-        super().save(*args, **kwargs)
-
     def __str__(self):
         return self.term
 
@@ -60,7 +55,7 @@ class Post(models.Model):
     categories = models.ManyToManyField(Category, related_name='posts')
     author = models.ForeignKey(User, related_name='posts')
     title = models.CharField(max_length=255, unique=True)
-    slug = models.SlugField(max_length=255)
+    slug = models.SlugField(max_length=255, db_index=True)
     content = RichTextUploadingField(blank=True)
     status_id = models.CharField(
         choices=STATUS_CHOICES,
@@ -90,11 +85,9 @@ class Post(models.Model):
 class Comment(models.Model):
     STATUS_PENDING = 'pending'
     STATUS_PUBLISHED = 'published'
-
     STATUS_CHOICES = (
         (STATUS_PENDING, 'Pending'),
-        (STATUS_PUBLISHED, 'Published'),
-    )
+        (STATUS_PUBLISHED, 'Published'), )
 
     post = models.ForeignKey(Post, related_name='comments')
     status_id = models.CharField(

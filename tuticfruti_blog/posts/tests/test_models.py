@@ -183,12 +183,6 @@ class TestTagModel(TestModelBase):
 
         self.assertEqual(num_tags, num_tags_expected)
 
-    def test_term_field_is_saved_in_lowercase(self):
-        term_expected = 'term'
-        term = models.Tag.objects.create(term='TeRm').term
-
-        self.assertEqual(term, term_expected)
-
     def test_default_ordering(self):
         tag_expected = models.Tag.objects.create(term='_term')
         tag = self.tags.first()

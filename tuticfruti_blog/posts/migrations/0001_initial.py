@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import models, migrations
+from django.db import migrations, models
 from django.conf import settings
+import ckeditor_uploader.fields
 
 
 class Migration(migrations.Migration):
@@ -15,7 +16,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Category',
             fields=[
-                ('id', models.AutoField(primary_key=True, auto_created=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
                 ('name', models.CharField(max_length=100, unique=True)),
                 ('slug', models.SlugField(max_length=25)),
                 ('order', models.IntegerField(default=0)),
@@ -29,10 +30,10 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Comment',
             fields=[
-                ('id', models.AutoField(primary_key=True, auto_created=True, serialize=False, verbose_name='ID')),
-                ('status_id', models.CharField(db_index=True, max_length=10, choices=[('pending', 'Pending'), ('published', 'Published')], default='pending')),
-                ('author', models.CharField(db_index=True, max_length=100)),
-                ('email', models.EmailField(db_index=True, max_length=254)),
+                ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
+                ('status_id', models.CharField(max_length=10, db_index=True, default='pending', choices=[('pending', 'Pending'), ('published', 'Published')])),
+                ('author', models.CharField(max_length=100, db_index=True)),
+                ('email', models.EmailField(max_length=254, db_index=True)),
                 ('content', models.TextField()),
                 ('created', models.DateTimeField(db_index=True, auto_now_add=True)),
                 ('modified', models.DateTimeField(db_index=True, auto_now=True)),
@@ -44,14 +45,14 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Post',
             fields=[
-                ('id', models.AutoField(primary_key=True, auto_created=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
                 ('title', models.CharField(max_length=255, unique=True)),
                 ('slug', models.SlugField(max_length=255)),
-                ('content', models.TextField(blank=True)),
-                ('status_id', models.CharField(db_index=True, max_length=10, choices=[('draft', 'Draft'), ('published', 'Published')], default='draft')),
+                ('content', ckeditor_uploader.fields.RichTextUploadingField(blank=True)),
+                ('status_id', models.CharField(max_length=10, db_index=True, default='draft', choices=[('draft', 'Draft'), ('published', 'Published')])),
                 ('created', models.DateTimeField(db_index=True, auto_now_add=True)),
                 ('modified', models.DateTimeField(db_index=True, auto_now=True)),
-                ('author', models.ForeignKey(related_name='posts', to=settings.AUTH_USER_MODEL)),
+                ('author', models.ForeignKey(to=settings.AUTH_USER_MODEL, related_name='posts')),
                 ('categories', models.ManyToManyField(to='posts.Category', related_name='posts')),
             ],
             options={
@@ -61,7 +62,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Tag',
             fields=[
-                ('id', models.AutoField(primary_key=True, auto_created=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
                 ('term', models.CharField(max_length=255, unique=True)),
             ],
             options={
@@ -76,6 +77,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='comment',
             name='post',
-            field=models.ForeignKey(related_name='comments', to='posts.Post'),
+            field=models.ForeignKey(to='posts.Post', related_name='comments'),
         ),
     ]

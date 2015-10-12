@@ -105,8 +105,9 @@ class HomePage(BasePage):
 
     def is_category_displayed(self, pk):
         try:
-            category_element = self._driver.find_element_by_id(
-                'category{}_id'.format(str(pk)))
+            category_element = self._driver \
+                .find_element_by_id('categories_id') \
+                .find_element_by_id('category{}_id'.format(str(pk)))
             if category_element:
                 return True
         except selenium_exceptions.NoSuchElementException:
