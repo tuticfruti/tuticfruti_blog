@@ -185,10 +185,31 @@ class TestPostListSearchView(TestViewCommonMixin, TestViewBase):
         self.assertEqual(posts.count(), posts_expected.count())
 
     def test_search_is_case_unsensitive(self):
-        self.fails('test_search_is_case_unsensitive FAULT')
+        num_posts_expected = self.published_posts \
+            .filter(tags__term__iregex=r'(python)') \
+            .count()
+        res = self.client.get(reverse('posts:search'), dict(search_terms='PYTHON'))
+        num_posts = res.context_data.get('posts').count()
+
+        self.assertEqual(num_posts, num_posts_expected)
+
+    def test_search_consider_also_category_field(self):
+        num_posts_expected = self.published_posts \
+            .filter(categories__name__iregex=r'(first)') \
+            .count()
+        res = self.client.get(reverse('posts:search'), dict(search_terms='first'))
+        num_posts = res.context_data.get('posts').count()
+
+        self.assertEqual(num_posts, num_posts_expected)
 
     def test_search_consider_also_title_field(self):
-        self.fails('test_search_in_title_too FAULT')
+        num_posts_expected = self.published_posts \
+            .filter(title__iregex=r'(published)') \
+            .count()
+        res = self.client.get(reverse('posts:search'), dict(search_terms='published'))
+        num_posts = res.context_data.get('posts').count()
+
+        self.assertEqual(num_posts, num_posts_expected)
 
 
 class TestPostDetailView(TestViewCommonMixin, TestViewBase):

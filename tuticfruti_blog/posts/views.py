@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.views import generic as generic_views
 from django.views.generic import edit as edit_mixins
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Q
 from django.core.urlresolvers import reverse
 
 from . import models
@@ -27,11 +27,13 @@ class PostListView(generic_views.ListView):
                 Prefetch('tags', queryset=tags),
                 Prefetch('comments', queryset=comments)) \
             .select_related('author')
+
         return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['categories'] = models.Category.objects.all_enabled()
+
         return context
 
 
@@ -41,24 +43,34 @@ class PostListByCategoryView(PostListView):
         category_slug = self.kwargs.get('slug')
         if category_slug:
             queryset = queryset.filter(categories__slug=category_slug)
+
         return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['current_category'] = self.kwargs.get('slug')
+
         return context
 
 
 class PostListSearchView(PostListByCategoryView):
     def get_queryset(self):
         queryset = super().get_queryset()
-        terms = self.request.GET.get('search_terms').lower().split()
-        queryset = queryset.filter(tags__term__in=terms).distinct()
+        terms = self.request.GET.get('search_terms').split()
+        regex = r'({})'.format('|'.join(terms))
+        queryset = queryset \
+            .filter(
+                Q(title__iregex=regex) |
+                Q(categories__name__iregex=regex) |
+                Q(tags__term__iregex=regex)) \
+            .distinct()
+
         return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['search_terms'] = self.request.GET.get('search_terms')
+
         return context
 
 
@@ -79,6 +91,7 @@ class PostDetailView(edit_mixins.FormMixin, generic_views.DetailView):
                 Prefetch('tags', queryset=tags),
                 Prefetch('categories', queryset=categories)) \
             .select_related('author')
+
         return queryset
 
     def get_success_url(self):
@@ -88,11 +101,13 @@ class PostDetailView(edit_mixins.FormMixin, generic_views.DetailView):
         context = super().get_context_data(**kwargs)
         context['form'] = self.get_form()
         context['categories'] = models.Category.objects.all_enabled()
+
         return context
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
         form = self.get_form()
+
         if form.is_valid():
             return self.form_valid(form)
         else:
@@ -104,4 +119,5 @@ class PostDetailView(edit_mixins.FormMixin, generic_views.DetailView):
             author=form['author'].value(),
             email=form['email'].value(),
             content=form['content'].value())
+
         return super().form_valid(form)
