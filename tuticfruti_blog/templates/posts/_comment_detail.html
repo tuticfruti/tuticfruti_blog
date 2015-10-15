@@ -1,4 +1,4 @@
-{% load static %}
+{% load static i18n %}
 
 <div id="comment{{ comment.pk }}_id" class="media comment">
 
@@ -11,7 +11,7 @@
 
     <!-- Comment author and reated date-->
     <div class="text-muted small">
-      <em>Created by</em>&nbsp;<strong class="author">{{ comment.author }}</strong>&nbsp;at&nbsp;<strong class="created">{{ comment.created|date:'F j, Y' }}</strong>.
+      <em>{% trans 'Created by' %}</em>&nbsp;<strong class="author">{{ comment.author }}</strong>&nbsp;{% trans 'at' context 'date' %}&nbsp;<strong class="created">{{ comment.created|date:'F j, Y' }}</strong>.
     </div>
 
     <!-- Comment content -->

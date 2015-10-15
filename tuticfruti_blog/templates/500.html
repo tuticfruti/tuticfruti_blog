@@ -1,13 +1,14 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Server Error - Tuticfruti blog{% endblock %}
+{% block title %}{% trans 'Server Error' %} - Tuticfruti blog{% endblock %}
 
 {% block content %}
 <div class="row">
   <div class="col-sm-12">
-    <h1>Opps!!! 500</h1>
-    <h4>Looks like something went wrong!</h4>
-    <p>We track these errors automatically, but if the problem persists feel free to contact us. In the meantime, try refreshing.</p>
+    <h1>{% trans 'Opps!!!' %} 500</h1>
+    <h4>{% trans 'Looks like something went wrong!' %}</h4>
+    <p>{% trans 'We track these errors automatically, but if the problem persists feel free to contact us. In the meantime, try refreshing.' %}</p>
   </div>
 </div>
 {% endblock content %}

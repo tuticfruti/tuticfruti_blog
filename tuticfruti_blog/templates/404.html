@@ -1,12 +1,13 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Page not found - Tuticfruti blog{% endblock %}
+{% block title %}{% trans 'Page not found' %} - Tuticfruti blog{% endblock %}
 
 {% block content %}
 <div class="row">
   <div class="col-sm-12">
-    <h1>404 Page not found</h1>
-    <p>This is not the page you were looking for.</p>
+    <h1>404 {% trans 'Page not found' %}.</h1>
+    <p>{% trans 'This is not the page you were looking for.' %}</p>
   </div>
 </div>
 {% endblock content %}

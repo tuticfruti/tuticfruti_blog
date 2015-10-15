@@ -1,4 +1,5 @@
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+from django.db.models import Count
 
 from tuticfruti_blog.core import data_fixtures
 from tuticfruti_blog.posts import models
@@ -18,7 +19,8 @@ class FunctionalTest(StaticLiveServerTestCase):
         cls.draft_post = models.Post.objects.get(slug='draft-post')
         cls.published_post = models.Post.objects.get(slug='published-post')
         cls.post_without_comments = models.Post.objects \
-            .filter(comments__isnull=True) \
+            .annotate(Count('comments')) \
+            .filter(comments__count=0) \
             .first()
         cls.python_post = models.Post.objects.get(slug='python-post')
         cls.django_post = models.Post.objects.get(slug='django-post')

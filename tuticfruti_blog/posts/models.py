@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from django.utils.translation import ugettext_lazy as _
 from django.db import models
 from django.core.urlresolvers import reverse
 from django.template.defaultfilters import slugify
@@ -10,20 +11,22 @@ from tuticfruti_blog.users.models import User
 
 
 class Tag(models.Model):
-    term = models.CharField(max_length=255, unique=True)
+    term = models.CharField(max_length=255, unique=True, verbose_name=_('term'))
 
     def __str__(self):
         return self.term
 
     class Meta:
+        verbose_name = _('tag')
+        verbose_name_plural = _('tags')
         ordering = ['term']
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=100, unique=True, blank=False)
-    slug = models.SlugField(max_length=25)
-    order = models.IntegerField(default=0)
-    is_enabled = models.BooleanField(default=True)
+    name = models.CharField(max_length=100, unique=True, blank=False, verbose_name=_('name'))
+    slug = models.SlugField(max_length=100, verbose_name=_('slug'))
+    order = models.IntegerField(default=0, verbose_name=_('order'))
+    is_enabled = models.BooleanField(default=True, verbose_name=_('is enabled'))
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
@@ -35,8 +38,9 @@ class Category(models.Model):
     objects = managers.CategoryManager()
 
     class Meta:
+        verbose_name = _('category')
+        verbose_name_plural = _('categories')
         ordering = ['order']
-        verbose_name_plural = 'categories'
 
 
 class Post(models.Model):
@@ -48,23 +52,23 @@ class Post(models.Model):
     STATUS_PUBLISHED = 'published'
 
     STATUS_CHOICES = (
-        (STATUS_DRAFT, 'Draft'),
-        (STATUS_PUBLISHED, 'Published'),
+        (STATUS_DRAFT, _('draft')),
+        (STATUS_PUBLISHED, _('published')),
     )
 
-    categories = models.ManyToManyField(Category, related_name='posts')
-    author = models.ForeignKey(User, related_name='posts')
-    title = models.CharField(max_length=255, unique=True)
-    slug = models.SlugField(max_length=255, db_index=True)
-    content = RichTextUploadingField(blank=True)
+    categories = models.ManyToManyField(Category, related_name='posts', verbose_name=_('categories'))
+    author = models.ForeignKey(User, related_name='posts', verbose_name=_('author'))
+    title = models.CharField(max_length=255, unique=True, verbose_name=_('title'))
+    slug = models.SlugField(max_length=255, db_index=True, verbose_name=_('slug'))
+    content = RichTextUploadingField(blank=True, verbose_name=_('content'))
     status_id = models.CharField(
         choices=STATUS_CHOICES,
         default=STATUS_DRAFT,
         max_length=10,
-        db_index=True)
-    tags = models.ManyToManyField(Tag, related_name='posts')
-    created = models.DateTimeField(auto_now_add=True, blank=True, db_index=True)
-    modified = models.DateTimeField(auto_now=True, blank=True, db_index=True)
+        db_index=True, verbose_name=_('status'))
+    tags = models.ManyToManyField(Tag, related_name='posts', verbose_name=_('tags'))
+    created = models.DateTimeField(auto_now_add=True, blank=True, db_index=True, verbose_name=_('created'))
+    modified = models.DateTimeField(auto_now=True, blank=True, db_index=True, verbose_name=_('modified'))
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.title)
@@ -79,6 +83,8 @@ class Post(models.Model):
     objects = managers.PostManager()
 
     class Meta:
+        verbose_name = _('post')
+        verbose_name_plural = _('posts')
         ordering = ['-created']
 
 
@@ -86,20 +92,20 @@ class Comment(models.Model):
     STATUS_PENDING = 'pending'
     STATUS_PUBLISHED = 'published'
     STATUS_CHOICES = (
-        (STATUS_PENDING, 'Pending'),
-        (STATUS_PUBLISHED, 'Published'), )
+        (STATUS_PENDING, _('pending')),
+        (STATUS_PUBLISHED, _('published')), )
 
-    post = models.ForeignKey(Post, related_name='comments')
+    post = models.ForeignKey(Post, related_name='comments', verbose_name=_('post'))
     status_id = models.CharField(
         choices=STATUS_CHOICES,
         default=STATUS_PENDING,
         max_length=10,
-        db_index=True)
-    author = models.CharField(max_length=100, db_index=True)
-    email = models.EmailField(db_index=True)
-    content = models.TextField()
-    created = models.DateTimeField(auto_now_add=True, blank=True, db_index=True)
-    modified = models.DateTimeField(auto_now=True, blank=True, db_index=True)
+        db_index=True, verbose_name=_('status'))
+    author = models.CharField(max_length=100, db_index=True, verbose_name=_('author'))
+    email = models.EmailField(db_index=True, verbose_name=_('email'))
+    content = models.TextField(verbose_name=_('content'))
+    created = models.DateTimeField(auto_now_add=True, blank=True, db_index=True, verbose_name=_('created'))
+    modified = models.DateTimeField(auto_now=True, blank=True, db_index=True, verbose_name=_('created'))
 
     def __str__(self):
         return self.content
@@ -107,4 +113,6 @@ class Comment(models.Model):
     objects = managers.CommentManager()
 
     class Meta:
+        verbose_name = _('comment')
+        verbose_name_plural = _('comments')
         ordering = ["-created"]

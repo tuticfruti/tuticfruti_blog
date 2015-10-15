@@ -1,6 +1,8 @@
+{% load i18n %}
+
 <div class="row">
   <div id="comments_id" class="col-sm-12">
-    <h4 class="text-muted">Comments:</h4>
+    <h4 class="text-muted">{% trans 'comments'|capfirst %}:</h4>
       {% for comment in post.comments.all %}
         {% include 'posts/_comment_detail.html' %}
       {% empty %}

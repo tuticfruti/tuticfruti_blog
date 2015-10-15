@@ -1,4 +1,4 @@
-{% load static %}
+{% load static i18n %}
 
 <nav id="navbar-top" class="navbar navbar-light navbar-fixed-top bg-faded">
 
@@ -21,7 +21,7 @@
 
           <form id="search_form_responsive_id" action="{% if current_category %}{% url 'posts:search_by_category' current_category %}{% else %}{% url 'posts:search' %}{% endif %}" method="get" class="navbar-form">
             <div class="input-group">
-              <input name="search_terms" type="text" class="form-control" placeholder="Search ..." value="{% if search_terms %}{{ search_terms }}{% endif %}" aria-label="">
+              <input name="search_terms" type="text" class="form-control" placeholder="{% trans 'Search ...' %}" value="{% if search_terms %}{{ search_terms }}{% endif %}" aria-label="">
               <span class="input-group-btn">
                 <button class="btn btn-primary" type="submit">Go!</button>
               </span>
@@ -49,7 +49,7 @@
     <div class="col-md-4 hidden-sm-down">
       <form class="form-inline pull-right" id="search_form_id" action="{% if current_category %}{% url 'posts:search_by_category' current_category %}{% else %}{% url 'posts:search' %}{% endif %}" method="get" class="navbar-form">
         <div class="input-group">
-          <input name="search_terms" type="text" class="form-control" placeholder="Search ..." value="{% if search_terms %}{{ search_terms }}{% endif %}" aria-label="">
+          <input name="search_terms" type="text" class="form-control" placeholder="{% trans 'Search ...' %}" value="{% if search_terms %}{{ search_terms }}{% endif %}" aria-label="">
           <span class="input-group-btn">
             <button class="btn btn-primary" type="submit">Go!</button>
           </span>

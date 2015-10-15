@@ -1,6 +1,8 @@
+{% load i18n %}
+
 <div class="row">
   <div class="col-md-7">
-      <h4 class="text-muted">New comment:</h4>
+      <h4 class="text-muted">{% trans 'New comment' %}:</h4>
       <form id="comment_form_id" method="post">{% csrf_token %}
         <div class="row">
           <div class="col-sm-12">
@@ -29,7 +31,7 @@
         <div class="row">
           <div class="col-sm-12">
             <div class="form-group">
-              <button class="btn btn-primary btn-block" type="submit">Send</button>
+              <button class="btn btn-primary btn-block" type="submit">{% trans 'Send' %}</button>
             </div>
           </div>
         </div>
