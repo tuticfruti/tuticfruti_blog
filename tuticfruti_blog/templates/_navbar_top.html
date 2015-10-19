@@ -1,4 +1,4 @@
-{% load static i18n %}
+{% load static %}
 
 <nav id="navbar-top" class="navbar navbar-light navbar-fixed-top bg-faded">
 
@@ -7,28 +7,13 @@
       <div class="collapse" id="exCollapsingNavbar">
         <div class="bg-faded p-a">
 
-          <div id="categories_responsive_id" class="list-group listgroup"> <!-- list-group -->
-            {% for category in categories %}
-              {% if category.slug == current_category %}
-                <a id="category_responsive{{ category.pk }}_id" href="#" class="category list-group-item active">{{ category.name }}</a>
-              {% else %}
-                <a id="category_responsive{{ category.pk }}_id" href="{% url 'posts:list_by_category' category.slug %}" class="category list-group-item">{{ category.name }}</a>
-              {% endif %}
-            {% endfor %}
-          </div> <!-- /list-group -->
+          <div id="categories_responsive_id" class="list-group listgroup">
+            {% include '_categories.html' with id='categories_responsive_id' %}<br>
+          </div>
 
-          <br>
+          {% include '_search_form.html' with id='search_form_responsive_id' %}<br><br>
 
-          <form id="search_form_responsive_id" action="{% if current_category %}{% url 'posts:search_by_category' current_category %}{% else %}{% url 'posts:search' %}{% endif %}" method="get" class="navbar-form">
-            <div class="input-group">
-              <input name="search_terms" type="text" class="form-control" placeholder="{% trans 'Search ...' %}" value="{% if search_terms %}{{ search_terms }}{% endif %}" aria-label="">
-              <span class="input-group-btn">
-                <button class="btn btn-primary" type="submit">Go!</button>
-              </span>
-            </div>
-          </form>
-
-        </div>
+        </div> <!-- /list-group -->
       </div>
     </div>
   </div>
@@ -38,23 +23,12 @@
     <div class="col-sm-11 col-md-8">
       <a class="navbar-brand" href="{% url 'home' %}" title="Tuticfruti blog">Tuticfruti blog</a>
       <ul id="categories_id" class="nav navbar-nav hidden-sm-down">
-        {% for category in categories %}
-          <li class="nav-item">
-            <a id="category{{ category.pk }}_id" href="{% url 'posts:list_by_category' category.slug %}" class="category nav-link {% if category.slug == current_category %} active{% endif %}">{{ category.name }}</a>
-          </li>
-        {% endfor %}
+        {% include '_categories.html' with id='categories_id' %}
       </ul>
     </div>
 
     <div class="col-md-4 hidden-sm-down">
-      <form class="form-inline pull-right" id="search_form_id" action="{% if current_category %}{% url 'posts:search_by_category' current_category %}{% else %}{% url 'posts:search' %}{% endif %}" method="get" class="navbar-form">
-        <div class="input-group">
-          <input name="search_terms" type="text" class="form-control" placeholder="{% trans 'Search ...' %}" value="{% if search_terms %}{{ search_terms }}{% endif %}" aria-label="">
-          <span class="input-group-btn">
-            <button class="btn btn-primary" type="submit">Go!</button>
-          </span>
-        </div>
-      </form>
+      {% include '_search_form.html' with id='search_form_id' %}
     </div>
 
     <div class="col-sm-1 pull-right hidden-md-up">

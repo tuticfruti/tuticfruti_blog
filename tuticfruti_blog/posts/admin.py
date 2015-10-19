@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
+from django.utils.translation import ugettext_lazy as _
 from django.db.models import Prefetch
 from django.contrib import admin
-from django.template.defaultfilters import striptags, truncatewords
 
 from . import models
 
@@ -14,12 +14,15 @@ class CommentInline(admin.TabularInline):
 class PostAdmin(admin.ModelAdmin):
     def _categories(self, obj):
         return obj.categories.values_list('name', flat=True)
+    _categories.short_description = _('categories')
 
     def _tags(self, obj):
         return obj.tags.values_list('term', flat=True)
+    _tags.short_description = _('tags')
 
     def num_comments(self, obj):
         return obj.comments.count()
+    num_comments.short_description = _('comments')
 
     date_hierarchy = 'created'
     fields = (('title', 'created', ), ('author', 'status_id', ), 'content', 'tags', 'categories', )

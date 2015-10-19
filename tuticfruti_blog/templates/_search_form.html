@@ -1,0 +1,10 @@
+{% load  i18n %}
+
+<form id="{{ id }}" class="pull-right" action="{% if current_category %}{% url 'posts:search_by_category' current_category %}{% else %}{% url 'posts:search' %}{% endif %}" method="get" class="navbar-form">
+  <div class="input-group">
+    <input name="search_terms" type="text" class="form-control" placeholder="{% trans 'Search ...' %}" value="{% if search_terms %}{{ search_terms }}{% endif %}" aria-label="">
+    <span class="input-group-btn">
+      <button class="btn btn-primary" type="submit">Go!</button>
+    </span>
+  </div>
+</form>

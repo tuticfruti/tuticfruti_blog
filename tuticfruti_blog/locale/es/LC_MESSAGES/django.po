@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-10-15 17:36+0200\n"
+"POT-Creation-Date: 2015-10-15 17:46+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -29,6 +29,11 @@ msgstr "^cuentas/"
 #: config/urls.py:31
 msgid "^posts/"
 msgstr "^articulos/"
+
+#: tuticfruti_blog/posts/admin.py:23 tuticfruti_blog/posts/models.py:117
+#: tuticfruti_blog/templates/posts/_comment_list.html:5
+msgid "comments"
+msgstr "comentarios"
 
 #: tuticfruti_blog/posts/forms.py:13
 msgid "Your name"
@@ -130,11 +135,6 @@ msgstr "correo electrónico"
 #: tuticfruti_blog/posts/models.py:116
 msgid "comment"
 msgstr "comentario"
-
-#: tuticfruti_blog/posts/models.py:117
-#: tuticfruti_blog/templates/posts/_comment_list.html:5
-msgid "comments"
-msgstr "comentarios"
 
 #: tuticfruti_blog/posts/urls.py:12
 msgid "^post/(?P<slug>(?!search)[-\\w]+)/$"
