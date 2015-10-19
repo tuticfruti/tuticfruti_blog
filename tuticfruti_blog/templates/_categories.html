@@ -1,23 +1,32 @@
-{% for category in categories %}
+{% if id == 'categories_id' %}
+  <ul id="categories_id" class="nav navbar-nav hidden-sm-down">
+    {% for category in categories %}
 
-  {% if  category.slug == current_category and id == 'categories_id' %}
-    <li class="nav-item">
-      <a id="category{{ category.pk }}_id" href="#" class="category nav-link active">{{ category.name }}</a>
-    </li>
-  {% endif %}
+      {% if category.slug == current_category %}
+        <li class="nav-item">
+          <a id="category{{ category.pk }}_id" href="#" class="category nav-link active">{{ category.name }}</a>
+        </li>
+      {% else %}
+        <li class="nav-item">
+          <a id="category{{ category.pk }}_id" href="{% url 'posts:list_by_category' category.slug %}" class="category nav-link">{{ category.name }}</a>
+        </li>
+      {% endif %}
 
-  {% if  category.slug != current_category and id == 'categories_id' %}
-    <li class="nav-item">
-      <a id="category{{ category.pk }}_id" href="{% url 'posts:list_by_category' category.slug %}" class="category nav-link">{{ category.name }}</a>
-    </li>
-  {% endif %}
+    {% endfor %}
+  </ul>
+{% endif %}
 
-  {% if category.slug == current_category and id == 'categories_responsive_id' %}
-    <a id="category_responsive{{ category.pk }}_id" href="#" class="category list-group-item active">{{ category.name }}</a>
-  {% endif %}
+{% if id == 'categories_responsive_id' %}
+  <div id="categories_responsive_id" class="list-group listgroup">
+    {% for category in categories %}
 
-  {% if category.slug  != current_category and id == 'categories_responsive_id' %}
-    <a id="category_responsive{{ category.pk }}_id" href="{% url 'posts:list_by_category' category.slug %}" class="category list-group-item">{{ category.name }}</a>
-  {% endif %}
+        {% if category.slug == current_category %}
+          <a id="category_responsive{{ category.pk }}_id" href="#" class="category list-group-item active">{{ category.name }}</a>
+        {% else %}
+          <a id="category_responsive{{ category.pk }}_id" href="{% url 'posts:list_by_category' category.slug %}" class="category list-group-item">{{ category.name }}</a>
+        {% endif %}
 
-{% endfor %}
+    {% endfor %}
+  </div>
+{% endif %}
+

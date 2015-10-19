@@ -3,28 +3,20 @@
 <nav id="navbar-top" class="navbar navbar-light navbar-fixed-top bg-faded">
 
   <div class="row">
-    <div class="col-xs-12">
+
+    <div class="col-xs-12 hidden-md-up">
       <div class="collapse" id="exCollapsingNavbar">
         <div class="bg-faded p-a">
-
-          <div id="categories_responsive_id" class="list-group listgroup">
-            {% include '_categories.html' with id='categories_responsive_id' %}<br>
-          </div>
-
-          {% include '_search_form.html' with id='search_form_responsive_id' %}<br><br>
-
+          <p>{% include '_categories.html' with id='categories_responsive_id' %}</p>
+          <p>{% include '_search_form.html' with id='search_form_responsive_id' %}</p>
+          <br><br>
         </div> <!-- /list-group -->
       </div>
     </div>
-  </div>
-
-  <div class="row">
 
     <div class="col-sm-11 col-md-8">
       <a class="navbar-brand" href="{% url 'home' %}" title="Tuticfruti blog">Tuticfruti blog</a>
-      <ul id="categories_id" class="nav navbar-nav hidden-sm-down">
-        {% include '_categories.html' with id='categories_id' %}
-      </ul>
+      {% include '_categories.html' with id='categories_id' %}
     </div>
 
     <div class="col-md-4 hidden-sm-down">
